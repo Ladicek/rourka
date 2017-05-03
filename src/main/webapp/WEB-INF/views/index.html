@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style>
+        td.cell-PASS {
+            background-color: lightgreen;
+        }
+        td.cell-FAIL {
+            background-color: lightpink;
+        }
+        td.cell-UNKNOWN {
+            background-color: lightgrey;
+        }
+    </style>
+</head>
+<body>
+
+<!--/*@thymesVar id="header" type="java.util.List<com.github.ladicek.rourka.ci.PipelineType>"*/-->
+<!--/*@thymesVar id="table" type="java.util.Map<com.github.ladicek.rourka.ci.PipelineDescription, Map<com.github.ladicek.rourka.ci.PipelineType,com.github.ladicek.rourka.ci.BuildResult>>"*/-->
+<table border="1" cellpadding="5">
+    <thead>
+    <tr>
+        <th></th>
+        <th th:each="column : ${header}" th:text="${column}">CI Type</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="row : ${table}">
+        <th th:text="${row.key}">Runtime Name | ID: Mission Name</th>
+        <td th:each="column : ${header}" th:with="cell = ${row.value[column]}" th:classappend="'cell-' + ${cell.status}">
+            <span th:text="${cell.status}">STATUS</span>
+            (<a href="#" th:href="${cell.link}" th:text="'build ' + ${cell.name}">build #0</a>)
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

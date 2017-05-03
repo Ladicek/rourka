@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: RoleBinding
+metadata:
+  name: ${project.artifactId}
+subjects:
+- kind: ServiceAccount
+  name: ${project.artifactId}
+roleRef:
+  name: view

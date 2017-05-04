@@ -2,6 +2,20 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <style>
+        table {
+            border-collapse: collapse;
+            text-align: left;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        th, td {
+            border-bottom: 1px solid #dddddd;
+            padding: 8px;
+        }
+        th.booster {
+            padding-right: 16px;
+        }
         td.cell-PASS {
             background-color: lightgreen;
         }
@@ -11,13 +25,22 @@
         td.cell-UNKNOWN {
             background-color: lightgrey;
         }
+        tr:hover td.cell-PASS {
+            background-color: green;
+        }
+        tr:hover td.cell-FAIL {
+            background-color: red;
+        }
+        tr:hover td.cell-UNKNOWN {
+            background-color: grey;
+        }
     </style>
 </head>
 <body>
 
 <!--/*@thymesVar id="header" type="java.util.List<com.github.ladicek.rourka.ci.PipelineType>"*/-->
 <!--/*@thymesVar id="table" type="java.util.Map<com.github.ladicek.rourka.ci.PipelineDescription, Map<com.github.ladicek.rourka.ci.PipelineType,com.github.ladicek.rourka.ci.BuildResult>>"*/-->
-<table border="1" cellpadding="5">
+<table>
     <thead>
     <tr>
         <th></th>
@@ -26,10 +49,10 @@
     </thead>
     <tbody>
     <tr th:each="row : ${table}">
-        <th th:text="${row.key}">Runtime Name | ID: Mission Name</th>
+        <th class="booster" th:text="${row.key}">Runtime Name | ID: Mission Name</th>
         <td th:each="column : ${header}" th:with="cell = ${row.value[column]}" th:classappend="'cell-' + ${cell.status}">
             <span th:text="${cell.status}">STATUS</span>
-            (<a href="#" th:href="${cell.link}" th:text="'build ' + ${cell.name}">build #0</a>)
+            (<a href="#" target="_blank" th:href="${cell.link}" th:text="'build ' + ${cell.name}">build #0</a>)
         </td>
     </tr>
     </tbody>

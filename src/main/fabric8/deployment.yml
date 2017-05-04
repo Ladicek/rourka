@@ -6,15 +6,15 @@ spec:
   template:
     spec:
       serviceAccountName: ${project.artifactId}
-#      containers:
-#      - readinessProbe:
-#          httpGet:
-#            path: /
-#            port: 8080
-#            scheme: HTTP
-#        livenessProbe:
-#          initialDelaySeconds: 10
-#          httpGet:
-#            path: /
-#            port: 8080
-#            scheme: HTTP
+      containers:
+      - readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+            scheme: HTTP
+        livenessProbe:
+          initialDelaySeconds: 10
+          httpGet:
+            path: /live
+            port: 8080
+            scheme: HTTP

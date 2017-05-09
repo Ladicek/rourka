@@ -43,13 +43,6 @@ public class IndexResource {
                     .sorted(Comparator.comparing(bc -> bc.getMetadata().getAnnotations().get("ci/description")))
                     .collect(Collectors.toList());
 
-            List<PipelineType> types = buildConfigs.stream()
-                    .map(bc -> bc.getMetadata().getAnnotations().get("ci/type"))
-                    .distinct()
-                    .sorted()
-                    .map(PipelineType::new)
-                    .collect(Collectors.toList());
-
             List<Build> builds = oc.builds()
                     .withLabelIn("openshift.io/build-config.name", buildConfigs.stream()
                             .map(bc -> bc.getMetadata().getName())
@@ -73,7 +66,14 @@ public class IndexResource {
                 table.computeIfAbsent(desc, ignored -> new LinkedHashMap<>()).put(type, result);
             }
 
-            return new View("index.html", "table", table, "header", types);
+            List<PipelineType> header = buildConfigs.stream()
+                    .map(bc -> bc.getMetadata().getAnnotations().get("ci/type"))
+                    .distinct()
+                    .sorted()
+                    .map(PipelineType::new)
+                    .collect(Collectors.toList());
+
+            return new View("index.html", "table", table, "header", header);
         }
     }
 

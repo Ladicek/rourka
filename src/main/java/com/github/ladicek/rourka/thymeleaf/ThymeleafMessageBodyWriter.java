@@ -19,6 +19,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 
 @Provider
 @Produces(MediaType.TEXT_HTML)
@@ -57,6 +58,6 @@ public class ThymeleafMessageBodyWriter implements MessageBodyWriter<View> {
         view.variables.forEach(context::setVariable);
 
         templateEngine.process("/WEB-INF/views/" + view.templatePath, context,
-                new OutputStreamWriter(entityStream));
+                new OutputStreamWriter(entityStream, StandardCharsets.UTF_8));
     }
 }

@@ -18,6 +18,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.io.StringReader;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -59,7 +61,7 @@ public class IndexResource {
                         .filter(b -> b.getStatus().getCompletionTimestamp() != null)
                         .max(Comparator.comparingInt(b -> Integer.parseInt(b.getMetadata().getAnnotations().get("openshift.io/build.number"))))
                         .map(IndexResource::getBuildResult)
-                        .orElse(new BuildResult(BuildStatus.UNKNOWN, null, null));
+                        .orElse(new BuildResult(BuildStatus.UNKNOWN, null, null, null));
 
                 PipelineDescription desc = new PipelineDescription(buildConfig.getMetadata().getAnnotations().get("ci/description"));
                 PipelineType type = new PipelineType(buildConfig.getMetadata().getAnnotations().get("ci/type"));
@@ -94,6 +96,11 @@ public class IndexResource {
         }
         String name = statusJson.getString("name");
         String link = build.getMetadata().getAnnotations().get("openshift.io/jenkins-build-uri");
-        return new BuildResult(status, name, link);
+        LocalDateTime timestamp = null;
+        try {
+            timestamp = LocalDateTime.parse(build.getStatus().getCompletionTimestamp(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        } catch (Exception e) {
+        }
+        return new BuildResult(status, name, link, timestamp);
     }
 }

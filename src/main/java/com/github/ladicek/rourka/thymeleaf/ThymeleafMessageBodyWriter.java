@@ -2,6 +2,7 @@ package com.github.ladicek.rourka.thymeleaf;
 
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
+import org.thymeleaf.extras.java8time.dialect.Java8TimeDialect;
 import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
 
 import javax.servlet.ServletContext;
@@ -38,6 +39,7 @@ public class ThymeleafMessageBodyWriter implements MessageBodyWriter<View> {
 
         templateEngine = new TemplateEngine();
         templateEngine.setTemplateResolver(templateResolver);
+        templateEngine.addDialect(new Java8TimeDialect());
     }
 
     @Override

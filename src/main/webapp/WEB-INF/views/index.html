@@ -55,7 +55,9 @@
         <th class="booster" th:text="${row.key}">Runtime Name | ID: Mission Name</th>
         <td th:each="column : ${header}" th:with="cell = ${row.value[column]}" th:classappend="'cell-' + ${cell.status}">
             <span th:text="${cell.status}">STATUS</span>
-            (<a href="#" target="_blank" th:href="${cell.link}" th:text="'build ' + ${cell.name}">build #0</a>)
+            <th:block th:if="${cell.name != null}">
+                (<a href="#" target="_blank" th:href="${cell.link}" th:text="'build ' + ${cell.name}">build #0</a>)
+            </th:block>
             <span class="timestamp" th:if="${cell.timestamp != null}" th:text="${#temporals.format(cell.timestamp, 'yyyy-MM-dd HH:mm')}">yyyy-MM-dd HH:mm</span>
         </td>
     </tr>

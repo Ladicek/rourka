@@ -48,12 +48,16 @@ objects:
         jenkinsfile: |
           node("launchpad-maven") {
             stage("Checkout") {
-              git url: '${CI_GIT_URL}', branch: '${CI_GIT_REF}'
+              // can't use just "git url: ..., branch: ..." because that doesn't clone submodules
+              checkout([$class: 'GitSCM',
+                        branches: [[name: '${CI_GIT_REF}']],
+                        extensions: [[$class: 'SubmoduleOption']],
+                        userRemoteConfigs: [[url: '${CI_GIT_URL}']]])
             }
 
             def ssoUrl
             stage("Deploy SSO") {
-              sh "cd sso; mvn fabric8:deploy"
+              sh "export _JAVA_OPTIONS=-Xmx256m; cd sso; mvn fabric8:deploy"
               ssoUrl = sh(
                 script: 'cd sso; java -jar target/sso-client.jar --displaySSOURL',
                 returnStdout: true
@@ -62,12 +66,16 @@ objects:
               ssoUrl = ssoUrl[0][1]
             }
 
-            stage("Local test") {
-              sh "mvn clean verify"
+            stage("Deploy secured app") {
+              sh "cd app; mvn fabric8:deploy -Popenshift -DSSO_AUTH_SERVER_URL=${ssoUrl}"
             }
 
-            stage("OpenShift test") {
-              sh "mvn clean verify -Popenshift,openshift-it -DSSO_AUTH_SERVER_URL=${ssoUrl}"
+            stage("SSO test") {
+              // TODO
+            }
+
+            stage("Undeploy secured app") {
+              sh "cd app; mvn fabric8:undeploy"
             }
 
             stage("Undeploy SSO") {

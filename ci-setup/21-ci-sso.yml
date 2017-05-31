@@ -71,7 +71,7 @@ objects:
             }
 
             stage("SSO test") {
-              // TODO
+              sh "cd sso; mvn verify -Psso-tests"
             }
 
             stage("Undeploy secured app") {

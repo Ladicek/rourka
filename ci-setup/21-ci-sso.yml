@@ -71,7 +71,8 @@ objects:
             }
 
             stage("SSO test") {
-              sh "cd sso; mvn verify -Psso-tests"
+              sleep 30 // wait a bit for SSO and secured app to actually start
+              sh "cd sso; export _JAVA_OPTIONS=-Xmx256m; mvn verify -Psso-tests"
             }
 
             stage("Undeploy secured app") {

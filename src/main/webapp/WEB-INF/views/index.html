@@ -53,7 +53,7 @@
     <tbody>
     <tr th:each="row : ${table}">
         <th class="booster" th:text="${row.key}">Runtime Name | ID: Mission Name</th>
-        <td th:each="column : ${header}" th:with="cell = ${row.value[column]}" th:classappend="'cell-' + ${cell.status}">
+        <td th:each="column : ${header}" th:if="${row.value[column] != null}" th:with="cell = ${row.value[column]}" th:classappend="'cell-' + ${cell.status}">
             <span th:text="${cell.status}">STATUS</span>
             <th:block th:if="${cell.name != null}">
                 (<a href="#" target="_blank" th:href="${cell.link}" th:text="'build ' + ${cell.name}">build #0</a>)

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  name: rourka
+spec:
+  source:
+    type: Git
+    git:
+      uri: "https://github.com/Ladicek/rourka"
+  strategy:
+    type: JenkinsPipeline
+    jenkinsPipelineStrategy:
+      jenkinsfilePath: Jenkinsfile

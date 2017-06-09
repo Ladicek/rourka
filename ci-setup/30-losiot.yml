@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: losiot-template
+parameters:
+- name: CI_NAME
+  description: "Name of the generated BuildConfig; format: losiot-target-deployment-runtime-mission"
+  required: true
+- name: CI_DESCRIPTION
+  description: "Description of the mission; format: Runtime | ID: Mission name"
+  required: true
+- name: CI_TYPE
+  description: What is being tested (e.g. launch-stage.openshift.io .zip)
+  required: true
+- name: LOSIOT_TARGET
+  description: Target of the test, either PROD or STAGE
+  required: true
+- name: LOSIOT_DEPLOYMENT_TYPE
+  description: Tested deployment type, either ZIP or OPENSHIFT
+  required: true
+- name: LOSIOT_MISSION
+  description: Tested mission
+  required: true
+- name: LOSIOT_RUNTIME
+  description: Tested runtime, either WILDFLY_SWARM, VERTX or SPRING_BOOT
+  required: true
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: "${CI_NAME}"
+    annotations:
+      ci/description: "${CI_DESCRIPTION}"
+      ci/type: "${CI_TYPE}"
+  spec:
+    source:
+      type: Git
+      git:
+        uri: "https://github.com/Ladicek/losiot"
+        ref: "master"
+    strategy:
+      type: JenkinsPipeline
+      jenkinsPipelineStrategy:
+        jenkinsfile: |
+          node("losiot-slave") {
+            stage("Checkout") {
+              git url: 'https://github.com/Ladicek/losiot', branch: 'master'
+            }
+
+            stage("Firefox test") {
+              sh "PATH=/firefox:$PATH xvfb-run -s \"-screen 0 1024x768x24\" mvn clean test -Dlosiot.target=${LOSIOT_TARGET} -Dlosiot.deployment.type=${LOSIOT_DEPLOYMENT_TYPE} -Dlosiot.mission=${LOSIOT_MISSION} -Dlosiot.runtime=${LOSIOT_RUNTIME}"
+            }
+          }

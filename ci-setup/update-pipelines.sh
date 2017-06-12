@@ -25,6 +25,7 @@ oc process ci-basic-template CI_NAME=ci-spring-boot-crud-booster         CI_DESC
 oc process ci-basic-template CI_NAME=ci-spring-boot-configmap-booster    CI_DESCRIPTION="Spring Boot | 102: ConfigMap"    CI_TYPE="Booster repo" CI_GIT_URL=https://github.com/snowdrop/spring-boot-configmap-booster $SHARED_SECRET | oc apply -f -
 oc process ci-sso-template   CI_NAME=ci-spring-boot-http-secured-booster CI_DESCRIPTION="Spring Boot | 103: SSO"          CI_TYPE="Booster repo" CI_GIT_URL=https://github.com/snowdrop/spring-boot-http-secured-booster $SHARED_SECRET | oc apply -f -
 oc process ci-basic-template CI_NAME=ci-spring-boot-health-check-booster CI_DESCRIPTION="Spring Boot | 104: Health Check" CI_TYPE="Booster repo" CI_GIT_URL=https://github.com/snowdrop/spring-boot-health-check-booster $SHARED_SECRET | oc apply -f -
+oc process ci-basic-template CI_NAME=ci-springboot-circuit-breaker-booster CI_DESCRIPTION="Spring Boot | 106: Circuit Breaker" CI_TYPE="Booster repo" CI_GIT_URL=https://github.com/snowdrop/spring-boot-circuit-breaker-booster $SHARED_SECRET | oc apply -f -
 
 # Losiot
 

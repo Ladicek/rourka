@@ -1,0 +1,20 @@
+apiVersion: batch/v2alpha1
+kind: ScheduledJob
+metadata:
+  name: losiot-trigger
+spec:
+  schedule: "@daily"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          serviceAccount: jenkins
+          containers:
+          - name: losiot-trigger
+            image: openshiftio/launchpad-jenkins-slave
+            command:
+            - /bin/sh
+            - -c
+            - oc get bc | grep losiot | cut -d ' ' -f 1 | xargs -L 1 oc start-build

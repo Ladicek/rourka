@@ -71,7 +71,7 @@ objects:
             }
 
             stage("SSO test") {
-              sleep 30 // wait a bit for SSO and secured app to actually start
+              sleep 60 // wait a bit for SSO and secured app to actually start
               sh "cd sso; export _JAVA_OPTIONS=-Xmx256m; mvn verify -Psso-tests"
             }
 

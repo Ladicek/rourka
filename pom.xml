@@ -16,8 +16,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <version.io.fabric8.maven-plugin>3.2.31</version.io.fabric8.maven-plugin>
-        <version.org.wildfly.swarm>2017.5.0</version.org.wildfly.swarm>
+        <version.io.fabric8.maven-plugin>3.5.22</version.io.fabric8.maven-plugin>
+        <version.io.fabric8.openshift-client>2.6.1</version.io.fabric8.openshift-client>
+        <version.org.thymeleaf>3.0.7.RELEASE</version.org.thymeleaf>
+        <version.org.thymeleaf.extras.java8time>3.0.0.RELEASE</version.org.thymeleaf.extras.java8time>
+        <version.org.wildfly.swarm>2017.8.1</version.org.wildfly.swarm>
     </properties>
 
     <dependencyManagement>
@@ -49,18 +52,18 @@
         <dependency>
             <groupId>org.thymeleaf</groupId>
             <artifactId>thymeleaf</artifactId>
-            <version>3.0.6.RELEASE</version>
+            <version>${version.org.thymeleaf}</version>
         </dependency>
         <dependency>
             <groupId>org.thymeleaf.extras</groupId>
             <artifactId>thymeleaf-extras-java8time</artifactId>
-            <version>3.0.0.RELEASE</version>
+            <version>${version.org.thymeleaf.extras.java8time}</version>
         </dependency>
 
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>openshift-client</artifactId>
-            <version>2.2.14</version>
+            <version>${version.io.fabric8.openshift-client}</version>
         </dependency>
     </dependencies>
 

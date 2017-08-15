@@ -66,20 +66,24 @@ objects:
               ssoUrl = ssoUrl[0][1]
             }
 
-            stage("Deploy secured app") {
-              sh "cd app; mvn fabric8:deploy -Popenshift -DSSO_AUTH_SERVER_URL=${ssoUrl}"
-            }
+            try {
+              stage("Deploy secured app") {
+                sh "cd app; mvn fabric8:deploy -Popenshift -DSSO_AUTH_SERVER_URL=${ssoUrl}"
+              }
 
-            stage("SSO test") {
-              sleep 60 // wait a bit for SSO and secured app to actually start
-              sh "cd sso; export _JAVA_OPTIONS=-Xmx256m; mvn verify -Psso-tests"
-            }
-
-            stage("Undeploy secured app") {
-              sh "cd app; mvn fabric8:undeploy"
-            }
-
-            stage("Undeploy SSO") {
-              sh "cd sso; mvn fabric8:undeploy"
+              try {
+                stage("SSO test") {
+                  sleep 60 // wait a bit for SSO and secured app to actually start
+                  sh "cd sso; export _JAVA_OPTIONS=-Xmx256m; mvn verify -Psso-tests"
+                }
+              } finally {
+                stage("Undeploy secured app") {
+                  sh "cd app; mvn fabric8:undeploy"
+                }
+              }
+            } finally {
+              stage("Undeploy SSO") {
+                sh "cd sso; mvn fabric8:undeploy"
+              }
             }
           }

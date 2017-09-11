@@ -77,6 +77,11 @@ objects:
                   sh "cd sso; export _JAVA_OPTIONS=-Xmx256m; mvn verify -Psso-tests"
                 }
               } finally {
+                stage("Publish results") {
+                  junit allowEmptyResults: true, keepLongStdio: true, testResults: "**/target/*-reports/*.xml"
+                  archiveArtifacts allowEmptyArchive: true, artifacts: "**/target/*-reports/*.xml"
+                }
+
                 stage("Undeploy secured app") {
                   sh "cd app; mvn fabric8:undeploy"
                 }

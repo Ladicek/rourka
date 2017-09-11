@@ -51,12 +51,19 @@ objects:
               git url: '${CI_GIT_URL}', branch: '${CI_GIT_REF}'
             }
 
-            stage("Local test") {
-              sh "mvn clean verify"
-            }
+            try {
+              stage("Local test") {
+                sh "mvn clean verify"
+              }
 
-            stage("OpenShift test") {
-              sh "oc policy add-role-to-user view -z default"
-              sh "mvn clean verify -Popenshift,openshift-it"
+              stage("OpenShift test") {
+                sh "oc policy add-role-to-user view -z default"
+                sh "mvn clean verify -Popenshift,openshift-it"
+              }
+            } finally {
+              stage("Publish results") {
+                junit allowEmptyResults: true, keepLongStdio: true, testResults: "**/target/*-reports/*.xml"
+                archiveArtifacts allowEmptyArchive: true, artifacts: "**/target/*-reports/*.xml"
+              }
             }
           }

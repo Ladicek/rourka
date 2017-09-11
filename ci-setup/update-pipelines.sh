@@ -29,6 +29,9 @@ oc process ci-sso-template   CI_NAME=ci-spring-boot-http-secured-booster   CI_DE
 oc process ci-basic-template CI_NAME=ci-spring-boot-health-check-booster   CI_DESCRIPTION="Spring Boot | 104: Health Check"    CI_TYPE="Booster repo" CI_GIT_URL=https://github.com/snowdrop/spring-boot-health-check-booster $SHARED_SECRET | oc apply -f -
 oc process ci-basic-template CI_NAME=ci-springboot-circuit-breaker-booster CI_DESCRIPTION="Spring Boot | 106: Circuit Breaker" CI_TYPE="Booster repo" CI_GIT_URL=https://github.com/snowdrop/spring-boot-circuit-breaker-booster $SHARED_SECRET | oc apply -f -
 
+exit
+# TODO Losiot needs a lot of changes
+
 # Losiot: STAGE
 
 oc process losiot-template CI_NAME=losiot-stage-zip-wfswarm-rest-http    CI_DESCRIPTION="WildFly Swarm | 100: HTTP API"     CI_TYPE="launch-stage.openshift.io .zip" LOSIOT_TARGET=STAGE LOSIOT_DEPLOYMENT_TYPE=ZIP LOSIOT_MISSION=M100_HTTP_API     LOSIOT_RUNTIME=WILDFLY_SWARM | oc apply -f -

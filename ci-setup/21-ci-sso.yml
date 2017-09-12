@@ -24,6 +24,8 @@ parameters:
   required: true
   generate: expression
   from: "[a-zA-Z0-9]{20}"
+- name: MAVEN_MIRROR
+  description: URL of a Maven proxy that should be put to ~/.m2/settings.xml as a mirror of external:*
 objects:
 - apiVersion: v1
   kind: BuildConfig
@@ -47,6 +49,12 @@ objects:
       jenkinsPipelineStrategy:
         jenkinsfile: |
           node("launchpad-maven") {
+            if ('${MAVEN_MIRROR}' != '') {
+              stage("Adjust settings.xml") {
+                sh 'sed -i "s|<!-- ### configured mirrors ### -->|<mirror><id>default</id><url>${MAVEN_MIRROR}</url><mirrorOf>external:*</mirrorOf></mirror>|" /home/jenkins/.m2/settings.xml'
+              }
+            }
+
             stage("Checkout") {
               // can't use just "git url: ..., branch: ..." because that doesn't clone submodules
               checkout([$class: 'GitSCM',

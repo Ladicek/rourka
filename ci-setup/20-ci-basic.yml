@@ -56,7 +56,10 @@ objects:
             }
 
             stage("Checkout") {
-              git url: '${CI_GIT_URL}', branch: '${CI_GIT_REF}'
+              // can't use just "git url: ..., branch: ..." because that doesn't support tags
+              checkout([$class: 'GitSCM',
+                        branches: [[name: '${CI_GIT_REF}']],
+                        userRemoteConfigs: [[url: '${CI_GIT_URL}']]])
             }
 
             try {

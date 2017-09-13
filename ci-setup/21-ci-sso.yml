@@ -65,7 +65,7 @@ objects:
 
             def ssoUrl
             stage("Deploy SSO") {
-              sh "export _JAVA_OPTIONS=-Xmx256m; cd sso; mvn fabric8:deploy"
+              sh "export _JAVA_OPTIONS=-Xmx256m; cd sso; mvn fabric8:deploy -B"
               ssoUrl = sh(
                 script: 'cd sso; java -jar target/sso-client.jar --displaySSOURL',
                 returnStdout: true
@@ -76,13 +76,13 @@ objects:
 
             try {
               stage("Deploy secured app") {
-                sh "cd app; mvn fabric8:deploy -Popenshift -DSSO_AUTH_SERVER_URL=${ssoUrl}"
+                sh "cd app; mvn fabric8:deploy -B -Popenshift -DSSO_AUTH_SERVER_URL=${ssoUrl}"
               }
 
               try {
                 stage("SSO test") {
                   sleep 60 // wait a bit for SSO and secured app to actually start
-                  sh "cd sso; export _JAVA_OPTIONS=-Xmx256m; mvn verify -Psso-tests"
+                  sh "cd sso; export _JAVA_OPTIONS=-Xmx256m; mvn verify -B -Psso-tests"
                 }
               } finally {
                 stage("Publish results") {
@@ -91,12 +91,12 @@ objects:
                 }
 
                 stage("Undeploy secured app") {
-                  sh "cd app; mvn fabric8:undeploy"
+                  sh "cd app; mvn fabric8:undeploy -B"
                 }
               }
             } finally {
               stage("Undeploy SSO") {
-                sh "cd sso; mvn fabric8:undeploy"
+                sh "cd sso; mvn fabric8:undeploy -B"
               }
             }
           }

@@ -64,12 +64,12 @@ objects:
 
             try {
               stage("Local test") {
-                sh "mvn clean verify"
+                sh "mvn clean verify -B"
               }
 
               stage("OpenShift test") {
                 sh "oc policy add-role-to-user view -z default"
-                sh "mvn clean verify -Popenshift,openshift-it"
+                sh "mvn clean verify -B -Popenshift,openshift-it"
               }
             } finally {
               stage("Publish results") {

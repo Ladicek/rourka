@@ -48,6 +48,6 @@ objects:
             }
 
             stage("Firefox test") {
-              sh "PATH=/firefox:$PATH xvfb-run -s \"-screen 0 1024x768x24\" mvn clean test -Dlosiot.target=${LOSIOT_TARGET} -Dlosiot.deployment.type=${LOSIOT_DEPLOYMENT_TYPE} -Dlosiot.mission=${LOSIOT_MISSION} -Dlosiot.runtime=${LOSIOT_RUNTIME}"
+              sh "PATH=/firefox:$PATH xvfb-run -s \"-screen 0 1024x768x24\" mvn clean test -B -Dlosiot.target=${LOSIOT_TARGET} -Dlosiot.deployment.type=${LOSIOT_DEPLOYMENT_TYPE} -Dlosiot.mission=${LOSIOT_MISSION} -Dlosiot.runtime=${LOSIOT_RUNTIME}"
             }
           }

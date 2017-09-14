@@ -37,6 +37,10 @@
         tr:hover td.cell-UNKNOWN {
             background-color: grey;
         }
+        p.generated-at {
+            margin-top: 2em;
+            font-size: 70%;
+        }
     </style>
 </head>
 <body>
@@ -63,6 +67,9 @@
     </tr>
     </tbody>
 </table>
+
+<!--/*@thymesVar id="now" type="java.time.LocalDateTime"*/-->
+<p class="generated-at">Generated at <span th:text="${#temporals.format(now, 'yyyy-MM-dd HH:mm')}">yyyy-MM-dd HH:mm</span>.</p>
 
 </body>
 </html>

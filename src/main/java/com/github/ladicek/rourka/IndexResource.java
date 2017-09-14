@@ -73,6 +73,10 @@ public class IndexResource {
                 .map(PipelineType::new)
                 .collect(Collectors.toList());
 
-        return new View("index.html", "table", table, "header", header);
+        return new View("index.html",
+                "table", table,
+                "header", header,
+                "now", LocalDateTime.now()
+        );
     }
 }

@@ -26,6 +26,10 @@ parameters:
   from: "[a-zA-Z0-9]{20}"
 - name: MAVEN_MIRROR
   description: URL of a Maven proxy that should be put to ~/.m2/settings.xml as a mirror of external:*
+- name: IS_REDHAT
+  description: Whether to perform any actions required only for Red Hat builds
+  required: true
+  value: "false"
 objects:
 - apiVersion: v1
   kind: BuildConfig
@@ -60,6 +64,9 @@ objects:
               checkout([$class: 'GitSCM',
                         branches: [[name: '${CI_GIT_REF}']],
                         userRemoteConfigs: [[url: '${CI_GIT_URL}']]])
+              if ('${IS_REDHAT}' == 'true') {
+                sh "mv pom-redhat.xml pom.xml || true"
+              }
             }
 
             try {

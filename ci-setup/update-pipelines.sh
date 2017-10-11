@@ -8,8 +8,8 @@ if [[ ! -z $CI_GITHUB_SECRET ]] ; then
   ADDITIONAL_OPTIONS="$ADDITIONAL_OPTIONS CI_GITHUB_SECRET=$CI_GITHUB_SECRET"
 fi
 
-if [[ ! -z $MAVEN_MIRROR ]] ; then
-  ADDITIONAL_OPTIONS="$ADDITIONAL_OPTIONS MAVEN_MIRROR=$MAVEN_MIRROR"
+if [[ ! -z $MAVEN_REPO_ADD ]] ; then
+  ADDITIONAL_OPTIONS="$ADDITIONAL_OPTIONS MAVEN_REPO_ADD=$MAVEN_REPO_ADD"
 fi
 
 oc process ci-basic-template CI_NAME=ci-wfswarm-rest-http         CI_DESCRIPTION="WildFly Swarm | 100: HTTP API"        CI_TYPE="Booster repo" CI_GIT_URL=https://github.com/wildfly-swarm-openshiftio-boosters/wfswarm-rest-http         $ADDITIONAL_OPTIONS | oc apply -f -

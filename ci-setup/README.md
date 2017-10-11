@@ -43,15 +43,15 @@ oc describe bc | grep webhooks
 
 The webhook is of type `application/json`.
 
-## Using a Maven mirror
+## Using an additional Maven repository
 
 Sometimes, it is necessary to run tests with artifacts that aren't
 available in any public Maven repository. If an environment variable
-`MAVEN_MIRROR` is set when running `./update-pipelines.sh`, the
+`MAVEN_REPO_ADD` is set when running `./update-pipelines.sh`, the
 `BuildConfig` templates are supposed to use its value as a URL
-of a Maven proxy that is configured in `~/.m2/settings.xml` as
-a mirror of `external:*`
+of an additional Maven repository that should be added to and
+enabled in `~/.m2/settings.xml`.
 
 ```bash
-MAVEN_MIRROR=http://... ./update-pipelines.sh
+MAVEN_REPO_ADD=http://... ./update-pipelines.sh
 ```

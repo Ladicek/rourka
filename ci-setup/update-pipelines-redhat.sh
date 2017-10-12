@@ -2,6 +2,8 @@
 
 # CI boosters
 
+# TODO the `sort -nr` part is pretty weak, it probably won't work
+# correctly once we have release versions greater than 9
 github_ref () {
   local booster=$1
   local target=$2

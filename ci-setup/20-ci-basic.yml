@@ -65,7 +65,12 @@ objects:
               checkout([$class: 'GitSCM',
                         branches: [[name: '${CI_GIT_REF}']],
                         userRemoteConfigs: [[url: '${CI_GIT_URL}']]])
+
               if ('${IS_REDHAT}' == 'true') {
+                if ('${CI_NAME}' == 'ci-wfswarm-circuit-breaker') {
+                  sh "mvn versions:set -DnewVersion=\$(grep '<version>' pom-redhat.xml | sed -n '2 p' | sed -e 's| *</\\?version>||g')"
+                }
+
                 sh "mv pom-redhat.xml pom.xml || true"
               }
             }

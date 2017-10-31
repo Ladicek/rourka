@@ -61,10 +61,9 @@ objects:
             }
 
             stage("Checkout") {
-              // can't use just "git url: ..., branch: ..." because that doesn't clone submodules
+              // can't use just "git url: ..., branch: ..." because that doesn't support tags
               checkout([$class: 'GitSCM',
                         branches: [[name: '${CI_GIT_REF}']],
-                        extensions: [[$class: 'SubmoduleOption']],
                         userRemoteConfigs: [[url: '${CI_GIT_URL}']]])
 
               if ('${IS_REDHAT}' == 'true') {
@@ -74,38 +73,30 @@ objects:
 
             def ssoUrl
             stage("Deploy SSO") {
-              sh "export _JAVA_OPTIONS=-Xmx256m; cd sso; mvn fabric8:deploy -B"
+              sh "oc apply -f service.sso.yaml"
               ssoUrl = sh(
-                script: 'cd sso; java -jar target/sso-client.jar --displaySSOURL',
+                script: "oc get route secure-sso -o jsonpath='https://{.spec.host}/auth'",
                 returnStdout: true
               ).trim()
-              ssoUrl = (ssoUrl =~ /Using auth server URL: (.+)/)
-              ssoUrl = ssoUrl[0][1]
             }
 
             try {
-              stage("Deploy secured app") {
-                sh "cd app; mvn fabric8:deploy -B -Popenshift -DSSO_AUTH_SERVER_URL=${ssoUrl}"
+              stage("Local test") {
+                sh "mvn clean verify -B"
               }
 
-              try {
-                stage("SSO test") {
-                  sleep 60 // wait a bit for SSO and secured app to actually start
-                  sh "cd sso; export _JAVA_OPTIONS=-Xmx256m; mvn verify -B -Psso-tests"
-                }
-              } finally {
-                stage("Publish results") {
-                  junit allowEmptyResults: true, keepLongStdio: true, testResults: "**/target/*-reports/*.xml"
-                  archiveArtifacts allowEmptyArchive: true, artifacts: "**/target/*-reports/*.xml"
-                }
-
-                stage("Undeploy secured app") {
-                  sh "cd app; mvn fabric8:undeploy -B"
-                }
+              stage("OpenShift test") {
+                sh "oc policy add-role-to-user view -z default"
+                sh "mvn clean verify -B -Popenshift,openshift-it -DSSO_AUTH_SERVER_URL=${ssoUrl}"
               }
             } finally {
+              stage("Publish results") {
+                junit allowEmptyResults: true, keepLongStdio: true, testResults: "**/target/*-reports/*.xml"
+                archiveArtifacts allowEmptyArchive: true, artifacts: "**/target/*-reports/*.xml"
+              }
+
               stage("Undeploy SSO") {
-                sh "cd sso; mvn fabric8:undeploy -B"
+                sh "oc delete -f service.sso.yaml"
               }
             }
           }

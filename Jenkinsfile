@@ -4,6 +4,6 @@ node("launchpad-maven") {
   }
 
   stage("Build and deploy") {
-    sh "mvn clean fabric8:deploy"
+    sh "mvn clean fabric8:deploy -B"
   }
 }

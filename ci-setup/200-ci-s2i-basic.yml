@@ -1,0 +1,116 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: ci-s2i-basic-template
+parameters:
+- name: CI_NAME
+  description: "Name of the generated BuildConfig; format: ci-s2i-<runtime>-<mission>"
+  required: true
+- name: CI_DESCRIPTION
+  description: "Description of the mission; format: Runtime | ID: Mission name"
+  required: true
+- name: CI_GIT_URL
+  description: URL of a Git repository containing the tested code
+  required: true
+- name: CI_GIT_REF
+  description: Git ref that should be checked out from CI_GIT_URL
+  required: true
+  value: master
+- name: CI_GITHUB_SECRET
+  description: A secret value to use for GitHub webhook URL
+  required: true
+  generate: expression
+  from: "[a-zA-Z0-9]{20}"
+- name: MAVEN_REPO_ADD
+  description: URL of an additional Maven repo that should be added to and enabled in ~/.m2/settings.xml
+- name: IS_REDHAT
+  description: Whether to perform any actions required only for Red Hat builds
+  required: true
+  value: "false"
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: "${CI_NAME}"
+    annotations:
+      ci/description: "${CI_DESCRIPTION}"
+      ci/type: "S2I"
+  spec:
+    completionDeadlineSeconds: 1800
+    source:
+      type: Git
+      git:
+        uri: "${CI_GIT_URL}"
+        ref: "${CI_GIT_REF}"
+    triggers:
+    - type: GitHub
+      github:
+        secret: "${CI_GITHUB_SECRET}"
+    strategy:
+      type: JenkinsPipeline
+      jenkinsPipelineStrategy:
+        jenkinsfile: |
+          def emulateLauncher(action) {
+            def yamlFiles = findFiles(glob: '**/.openshiftio/*.yml') + findFiles(glob: '**/.openshiftio/*.yaml')
+            for (int i = 0; i < yamlFiles.length; i++) { // because iterators aren't Serializable :-(
+              def y = yamlFiles[i]
+              if (y.name =~ /^(application|service|resource)\./ && y.name =~ /\.ya?ml$/) {
+                def content = readFile(file: y.path)
+                if (content.contains('kind: Template')) {
+                  sh "oc process -f ${y.path} -v SOURCE_REPOSITORY_URL=${CI_GIT_URL} -v SOURCE_REPOSITORY_REF=${CI_GIT_REF} | oc $action -f -"
+                } else {
+                  sh "oc $action -f ${y.path}"
+                }
+              }
+            }
+          }
+
+          node("launchpad-maven") {
+            if ('${MAVEN_REPO_ADD}' != '') {
+              stage("Adjust settings.xml") {
+                sh 'sed -i "s|https://maven.repository.redhat.com/techpreview/all|${MAVEN_REPO_ADD}|" /home/jenkins/.m2/settings.xml'
+                sh 'sed -i "s|</activeProfiles>|<activeProfile>jboss-eap-repository</activeProfile></activeProfiles>|" /home/jenkins/.m2/settings.xml'
+              }
+            }
+
+            stage("Checkout") {
+              // can't use just "git url: ..., branch: ..." because that doesn't support tags
+              checkout([$class: 'GitSCM',
+                        branches: [[name: '${CI_GIT_REF}']],
+                        userRemoteConfigs: [[url: '${CI_GIT_URL}']]])
+
+              if ('${IS_REDHAT}' == 'true') {
+                if ('${CI_NAME}' == 'ci-s2i-wfswarm-circuit-breaker') {
+                  sh "mvn versions:set -DnewVersion=\$(grep '<version>' pom-redhat.xml | sed -n '2 p' | sed -e 's| *</\\?version>||g')"
+                }
+
+                sh "mv pom-redhat.xml pom.xml || true"
+              }
+            }
+
+            try {
+              stage("Local test") {
+                sh "mvn clean verify -B"
+              }
+
+              stage("S2I build & deploy") {
+                emulateLauncher("apply")
+                sleep 300 // wait a bit for the build and deployment to finish
+              }
+
+              stage("OpenShift test") {
+                // the "-Dnamespace.use.current=true -DenableImageStreamDetection=false" stuff shouldn't be necessary
+                // and when all boosters move to using this by default, it should be removed from here
+                sh "mvn clean verify -B -Popenshift-it -Denv.init.enabled=false       -Dnamespace.use.current=true -DenableImageStreamDetection=false"
+              }
+            } finally {
+              stage("Publish results") {
+                junit allowEmptyResults: true, keepLongStdio: true, testResults: "**/target/*-reports/*.xml"
+                archiveArtifacts allowEmptyArchive: true, artifacts: "**/target/*-reports/*.xml"
+              }
+
+              stage("Undeploy") {
+                emulateLauncher("delete")
+              }
+            }
+          }

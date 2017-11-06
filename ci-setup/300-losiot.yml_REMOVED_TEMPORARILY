@@ -33,6 +33,7 @@ objects:
       ci/description: "${CI_DESCRIPTION}"
       ci/type: "${CI_TYPE}"
   spec:
+    completionDeadlineSeconds: 1800
     source:
       type: Git
       git:

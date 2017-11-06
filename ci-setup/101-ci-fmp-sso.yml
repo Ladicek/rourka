@@ -1,16 +1,13 @@
 apiVersion: v1
 kind: Template
 metadata:
-  name: ci-sso-template
+  name: ci-fmp-sso-template
 parameters:
 - name: CI_NAME
-  description: "Name of the generated BuildConfig; format: ci-runtime-mission"
+  description: "Name of the generated BuildConfig; format: ci-fmp-<runtime>-<mission>"
   required: true
 - name: CI_DESCRIPTION
   description: "Description of the mission; format: Runtime | ID: Mission name"
-  required: true
-- name: CI_TYPE
-  description: "What is being tested (e.g. booster CI)"
   required: true
 - name: CI_GIT_URL
   description: URL of a Git repository containing the tested code
@@ -37,8 +34,9 @@ objects:
     name: "${CI_NAME}"
     annotations:
       ci/description: "${CI_DESCRIPTION}"
-      ci/type: "${CI_TYPE}"
+      ci/type: "Fabric8 Maven plugin"
   spec:
+    completionDeadlineSeconds: 1800
     source:
       type: Git
       git:

@@ -2,8 +2,6 @@
 
 # CI boosters
 
-# TODO the `sort -nr` part is pretty weak, it probably won't work
-# correctly once we have release versions greater than 9
 github_ref () {
   local booster=$1
   local target=$2
@@ -22,7 +20,7 @@ github_ref () {
       vertx*)       github=https://github.com/openshiftio-vertx-boosters/${booster}-redhat/ ; filter='.' ;;
       spring-boot*) github=https://github.com/snowdrop/$booster/                            ; filter='redhat' ;;
     esac
-    echo $(git ls-remote --refs --tags $github | awk '{print $2}' | grep $filter | sort -nr | head -n 1 | sed -e 's|refs/||')
+    echo $(git ls-remote --refs --tags $github | awk '{print $2}' | grep $filter | sort --version-sort --reverse | head -n 1 | sed -e 's|refs/||')
   else
     echo $target
   fi

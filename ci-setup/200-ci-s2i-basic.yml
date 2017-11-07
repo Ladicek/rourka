@@ -89,10 +89,6 @@ objects:
             }
 
             try {
-              stage("Local test") {
-                sh "mvn clean verify -B"
-              }
-
               stage("S2I build & deploy") {
                 emulateLauncher("apply")
                 sleep 300 // wait a bit for the build and deployment to finish

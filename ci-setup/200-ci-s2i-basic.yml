@@ -86,6 +86,10 @@ objects:
 
                 sh "mv pom-redhat.xml pom.xml || true"
               }
+
+              if ('${MAVEN_REPO_ADD}' != '') {
+                sh 'find . -regex '.*/\.openshiftio/application.ya?ml' | xargs sed -i "s|- name: MAVEN_ARGS_APPEND|- name: MAVEN_MIRROR_URL\\n          value: ${MAVEN_REPO_ADD}\\n        - name: MAVEN_ARGS_APPEND|"'
+              }
             }
 
             try {

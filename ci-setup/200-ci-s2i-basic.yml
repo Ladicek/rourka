@@ -84,6 +84,11 @@ objects:
                   sh "mvn versions:set -DnewVersion=\$(grep '<version>' pom-redhat.xml | sed -n '2 p' | sed -e 's| *</\\?version>||g')"
                 }
 
+                // here we take advantage of the fact that the local checkout is the same as what will be built
+                if ('${CI_NAME}'.contains('wfswarm') && fileExists('pom-redhat.xml')) {
+                  sh 'sed -i "s|-pl|-f pom-redhat.xml -pl|" .openshiftio/application.yaml || true'
+                }
+
                 sh "mv pom-redhat.xml pom.xml || true"
               }
 

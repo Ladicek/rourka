@@ -1,6 +1,11 @@
 #!/bin/bash
 
-for B in $(oc get bc -o name | grep 'ci-\|losiot-' | sed -r -e 's|buildconfigs?/||') ; do
+FILTER=.
+if [[ -n $ROURKA_BOOSTERS_FILTER ]] ; then
+  FILTER=$ROURKA_BOOSTERS_FILTER
+fi
+
+for B in $(oc get bc -o name | grep 'ci-\|losiot-' | grep "$FILTER" | sed -r -e 's|buildconfigs?/||') ; do
   echo "---------- $B ----------"
   GIT_URL=$(oc get bc $B -o jsonpath='{.spec.source.git.uri}')
   GIT_REF=$(oc get bc $B -o jsonpath='{.spec.source.git.ref}')

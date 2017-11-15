@@ -12,7 +12,7 @@ for B in $(oc get bc -o name | grep 'ci-\|losiot-' | grep "$FILTER" | sed -r -e 
   GIT_SHA=$(git ls-remote $GIT_URL $GIT_REF | awk '{print $1}')
   echo "${GIT_URL}@${GIT_REF}: ${GIT_SHA}"
 
-  if [[ $B =~ spring-boot-configmap ]] || [[ $B =~ vertx-configmap-booster ]] ; then
+  if [[ $B =~ spring-boot-configmap ]] || [[ $B =~ spring-boot-circuit-breaker ]] || [[ $B =~ vertx-configmap ]] ; then
     for I in $(seq 1 5) ; do
       echo "Attempt #$I..."
       oc start-build $B --wait && break

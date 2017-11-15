@@ -85,7 +85,11 @@ objects:
 
               stage("OpenShift test") {
                 sh "oc policy add-role-to-user view -z default"
-                sh "mvn clean verify -B -Popenshift,openshift-it -DSSO_AUTH_SERVER_URL=${ssoUrl}"
+                if ('${CI_NAME}'.contains('vertx')) {
+                  sh "mvn clean fabric8:deploy -Popenshift && sleep 60 && mvn verify -Popenshift,openshift-it && mvn fabric8:undeploy"
+                } else {
+                  sh "mvn clean verify -B -Popenshift,openshift-it -DSSO_AUTH_SERVER_URL=${ssoUrl}"
+                }
               }
             } finally {
               stage("Publish results") {

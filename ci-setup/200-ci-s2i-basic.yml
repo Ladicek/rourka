@@ -50,14 +50,29 @@ objects:
       type: JenkinsPipeline
       jenkinsPipelineStrategy:
         jenkinsfile: |
+          def findDirNameFromYamlPath(path) {
+            def index = path.indexOf('.openshiftio')
+            if (index >= 0) {
+              path = path.substring(0, index)
+            }
+            if (path.endsWith('/')) {
+              path = path.substring(0, path.length() - 1)
+            }
+            if (path.isEmpty()) {
+              path = '.'
+            }
+            return path
+          }
+
           def emulateLauncher(action) {
             def yamlFiles = findFiles(glob: '**/.openshiftio/*.yml') + findFiles(glob: '**/.openshiftio/*.yaml')
             for (int i = 0; i < yamlFiles.length; i++) { // because iterators aren't Serializable :-(
               def y = yamlFiles[i]
               if (y.name =~ /^(application|service|resource)\./ && y.name =~ /\.ya?ml$/) {
+                def dir = findDirNameFromYamlPath(y.path)
                 def content = readFile(file: y.path)
                 if (content.contains('kind: Template')) {
-                  sh "oc process -f ${y.path} -v SOURCE_REPOSITORY_URL=${CI_GIT_URL} -v SOURCE_REPOSITORY_REF=${CI_GIT_REF} | oc $action -f -"
+                  sh "oc process -f ${y.path} -v SOURCE_REPOSITORY_URL=${CI_GIT_URL} -v SOURCE_REPOSITORY_REF=${CI_GIT_REF} -v SOURCE_REPOSITORY_DIR=${dir} | oc $action -f -"
                 } else {
                   sh "oc $action -f ${y.path}"
                 }

@@ -5,4 +5,4 @@ metadata:
   labels:
     role: jenkins-slave
 spec:
-  dockerImageRepository: openshiftio/launchpad-jenkins-slave
+  dockerImageRepository: ladicek/launchpad-jenkins-slave

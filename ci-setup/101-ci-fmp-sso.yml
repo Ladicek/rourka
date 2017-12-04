@@ -84,7 +84,6 @@ objects:
               }
 
               stage("OpenShift test") {
-                sh "oc policy add-role-to-user view -z default"
                 if ('${CI_NAME}'.contains('vertx')) {
                   sh "mvn clean fabric8:deploy -Popenshift && sleep 60 && mvn verify -Popenshift,openshift-it && mvn fabric8:undeploy"
                 } else {

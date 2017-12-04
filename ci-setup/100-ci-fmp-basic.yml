@@ -79,7 +79,6 @@ objects:
               }
 
               stage("OpenShift test") {
-                sh "oc policy add-role-to-user view -z default"
                 sh "mvn clean verify -B -Popenshift,openshift-it"
               }
             } finally {

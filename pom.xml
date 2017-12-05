@@ -16,13 +16,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <version.io.fabric8.maven-plugin>3.5.30</version.io.fabric8.maven-plugin>
-        <version.io.fabric8.openshift-client>2.6.3</version.io.fabric8.openshift-client>
+        <version.io.fabric8.maven-plugin>3.5.33</version.io.fabric8.maven-plugin>
+        <version.io.fabric8.openshift-client>3.1.0</version.io.fabric8.openshift-client>
         <version.org.apache.httpcomponents.fluent-hc>4.5.3</version.org.apache.httpcomponents.fluent-hc>
         <version.org.jooq.joox>1.5.0</version.org.jooq.joox>
-        <version.org.thymeleaf>3.0.7.RELEASE</version.org.thymeleaf>
+        <version.org.thymeleaf>3.0.9.RELEASE</version.org.thymeleaf>
         <version.org.thymeleaf.extras.java8time>3.0.1.RELEASE</version.org.thymeleaf.extras.java8time>
-        <version.org.wildfly.swarm>2017.9.4</version.org.wildfly.swarm>
+        <version.org.wildfly.swarm>2017.11.0</version.org.wildfly.swarm>
     </properties>
 
     <dependencyManagement>

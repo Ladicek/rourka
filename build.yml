@@ -1,13 +1,106 @@
 apiVersion: v1
-kind: BuildConfig
-metadata:
-  name: rourka
-spec:
-  source:
-    type: Git
-    git:
-      uri: "https://github.com/Ladicek/rourka"
-  strategy:
-    type: JenkinsPipeline
-    jenkinsPipelineStrategy:
-      jenkinsfilePath: Jenkinsfile
+kind: List
+items:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: rourka
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: rourka
+  spec:
+    source:
+      type: Git
+      git:
+        uri: "https://github.com/Ladicek/rourka"
+        ref: master
+    strategy:
+      type: Source
+      sourceStrategy:
+        from:
+          kind: DockerImage
+          name: "registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift:latest"
+    output:
+      to:
+        kind: ImageStreamTag
+        name: "rourka:latest"
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: rourka
+- apiVersion: v1
+  kind: RoleBinding
+  metadata:
+    name: rourka
+  roleRef:
+    name: view
+  subjects:
+  - kind: ServiceAccount
+    name: rourka
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: rourka
+    labels:
+      app: rourka
+  spec:
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          app: rourka
+      spec:
+        serviceAccountName: rourka
+        containers:
+        - name: rourka
+          image: "rourka:latest"
+          ports:
+          - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+              scheme: HTTP
+          livenessProbe:
+            initialDelaySeconds: 10
+            httpGet:
+              path: /live
+              port: 8080
+              scheme: HTTP
+    triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        from:
+          kind: ImageStreamTag
+          name: "rourka:latest"
+        containerNames:
+        - rourka
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: rourka
+    labels:
+      app: rourka
+  spec:
+    selector:
+      app: rourka
+    type: ClusterIP
+    ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: rourka
+    labels:
+      app: rourka
+  spec:
+    to:
+      kind: Service
+      name: rourka
+    port:
+      targetPort: 8080

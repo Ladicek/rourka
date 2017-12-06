@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: ImageStream
 metadata:
-  name: launchpad-maven
+  name: rourka-maven
   labels:
     role: jenkins-slave
 spec:
-  dockerImageRepository: ladicek/launchpad-jenkins-slave
+  dockerImageRepository: ladicek/rourka-jenkins-slave-maven

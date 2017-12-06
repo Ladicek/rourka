@@ -50,7 +50,7 @@ objects:
       type: JenkinsPipeline
       jenkinsPipelineStrategy:
         jenkinsfile: |
-          node("launchpad-maven") {
+          node("rourka-maven") {
             if ('${MAVEN_REPO_ADD}' != '') {
               stage("Adjust settings.xml") {
                 sh 'sed -i "s|https://maven.repository.redhat.com/techpreview/all|${MAVEN_REPO_ADD}|" /home/jenkins/.m2/settings.xml'

@@ -15,6 +15,7 @@ items:
       git:
         uri: "https://github.com/Ladicek/rourka"
         ref: master
+      contextDir: dashboard
     strategy:
       type: Source
       sourceStrategy:

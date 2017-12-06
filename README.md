@@ -4,13 +4,11 @@
 
 The entire test environment is a set of OpenShift pipeline builds,
 one pipeline for each cell in the testing matrix. The testing matrix
-is _Runtime_ x _Mission_ x _Tested Scenario_.
+is _Runtime_ x _Mission_ x _Tested Scenario_. Jenkins pipelines are
+used to drive the tests, they are not themselves considered part
+of the system under test.
 
-Jenkins pipelines are used to drive the tests, they are not themselves
-considered part of the system under test.
-
-The _Rourka_ application, as present in this repo, is "just" a dashboard
-that reads all the pipelines and their statuses via the OpenShift API
+The dashboard reads all the pipelines and their statuses via the OpenShift API
 and presents them in a nicely colored tabular format. It can be deployed
 by `mvn fabric8:deploy` or `oc apply -f build.yml && oc start-build rourka`.
 

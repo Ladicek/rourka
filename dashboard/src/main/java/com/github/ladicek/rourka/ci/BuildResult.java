@@ -33,7 +33,7 @@ public final class BuildResult {
                 status = BuildStatus.UNKNOWN;
         }
         String name = statusJson.getString("name");
-        String link = build.getMetadata().getAnnotations().get("openshift.io/jenkins-build-uri");
+        String link = "/console-text/" + build.getMetadata().getName();
         LocalDateTime timestamp = null;
         try {
             timestamp = LocalDateTime.parse(build.getStatus().getCompletionTimestamp(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);

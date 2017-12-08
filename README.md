@@ -14,13 +14,14 @@ by `mvn fabric8:deploy` or `oc apply -f build.yml && oc start-build rourka`.
 
 ## How to set it up
 
+Select the correct OpenShift project (`oc project` or `oc new-project`).
+
 ```bash
 cd ci-setup
 
-oc new-project <project>
-oc new-app --template=jenkins-ephemeral
-
 for F in *.yml ; do oc apply -f $F ; done
+
+oc new-app --template=jenkins-ephemeral --param NAMESPACE=$(oc project -q)
 
 ./update-pipelines.sh
 ```

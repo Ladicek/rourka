@@ -64,4 +64,12 @@ public final class BuildResult {
     public LocalDateTime getTimestamp() {
         return timestamp;
     }
+
+    public String toString()
+    {
+        return "Build Status: " + status
+                + ", name: " + name
+                + ", link: " + link
+                + ", timestamp: " + timestamp;
+    }
 }

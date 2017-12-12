@@ -4,21 +4,21 @@ import com.github.ladicek.rourka.ci.BuildResult;
 import com.github.ladicek.rourka.ci.BuildStatus;
 import com.github.ladicek.rourka.ci.PipelineDescription;
 import com.github.ladicek.rourka.ci.PipelineType;
+import com.github.ladicek.rourka.jenkins.JenkinsDataProvider;
+import com.github.ladicek.rourka.jenkins.Job;
+import com.github.ladicek.rourka.openshift.TokenAuthorizingHttpClient;
 import com.github.ladicek.rourka.thymeleaf.View;
 import io.fabric8.openshift.api.model.Build;
 import io.fabric8.openshift.api.model.BuildConfig;
 import io.fabric8.openshift.client.OpenShiftClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonObject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.io.StringReader;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -30,9 +30,17 @@ public class IndexResource {
     @Inject
     private OpenShiftClient oc;
 
+    @Inject
+    @TokenAuthorizingHttpClient
+    private CloseableHttpClient httpClient;
+
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public View get() {
+    public View get() throws Exception {
+
+        JenkinsDataProvider jenkinsDataProvider=new JenkinsDataProvider(httpClient);
+        List<Job> jobs=jenkinsDataProvider.getJobs();
+
         List<BuildConfig> buildConfigs = oc.buildConfigs()
                 .list()
                 .getItems()

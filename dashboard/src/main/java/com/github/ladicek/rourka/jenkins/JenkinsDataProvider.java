@@ -1,15 +1,11 @@
 package com.github.ladicek.rourka.jenkins;
 
-import com.github.ladicek.rourka.ci.BuildResult;
-import com.github.ladicek.rourka.ci.BuildStatus;
+import com.github.ladicek.rourka.ci.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
+import javax.json.*;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.StringReader;
@@ -70,8 +66,9 @@ public class JenkinsDataProvider {
     {
         JsonObject jobInfo = getJsonApiPage(job.getUrl());
 
-        // TODO: description will probably be different (maybe it will be JSON)
-        job.setDescription(readStringOrNull(jobInfo,"description"));
+
+        // parse JSON present in description
+        parseJobDescrption(job,jobInfo);
 
         JsonValue lastBuild = jobInfo.get("lastBuild");
 
@@ -90,10 +87,43 @@ public class JenkinsDataProvider {
                     buildConsoleOutputUrl(job,lastBuildNumber),
 
                     // parse the milisecond timestamp from json page into LocalDateTime
-                    LocalDateTime.ofInstant(Instant.ofEpochMilli(Integer.toUnsignedLong((lastBuildPage.getInt("timestamp")))),
+                    LocalDateTime.ofInstant(
+                            Instant.ofEpochMilli(
+                                new Long(lastBuildPage.get("timestamp").toString())
+                            ),
                             TimeZone.getDefault().toZoneId())
             );
             job.setLastBuildResult(lastBuildResult);
+        }
+    }
+
+    private void parseJobDescrption(Job job, JsonObject jobInfo)
+    {
+        try {
+            String descriptionString = readStringOrNull(jobInfo, "description");
+            JsonObject descriptionJson = Json.createReader(new StringReader(descriptionString)).readObject();
+
+            if (descriptionJson != null) {
+                job.setDescription(new PipelineDescription(
+                        readStringOrNull(descriptionJson, "description")
+                ));
+
+                job.setType(new PipelineType(
+                        readStringOrNull(descriptionJson, "type")
+                ));
+
+                job.setCluster(new Cluster(
+                        readStringOrNull(descriptionJson, "cluster")
+                ));
+            } else {
+                job.setDescription(new PipelineDescription(null));
+                job.setType(new PipelineType(null));
+                job.setCluster(new Cluster(null));
+            }
+        } catch (JsonException exception){
+            job.setDescription(new PipelineDescription(null));
+            job.setType(new PipelineType(null));
+            job.setCluster(new Cluster(null));
         }
     }
 
@@ -145,7 +175,6 @@ public class JenkinsDataProvider {
     public StreamingOutput readConsoleOutput(String buildName, String buildNumber) throws IOException
     {
         String url=jenkinsUrl + "/job/" + buildName + "/" + buildNumber + "/consoleText";
-        System.out.println("console output url: " + url);
         return output -> executor.execute(Request.Get(url)).returnResponse().getEntity().writeTo(output);
     }
 }

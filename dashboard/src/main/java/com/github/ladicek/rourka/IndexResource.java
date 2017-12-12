@@ -1,6 +1,7 @@
 package com.github.ladicek.rourka;
 
 import com.github.ladicek.rourka.ci.BuildResult;
+import com.github.ladicek.rourka.ci.Cluster;
 import com.github.ladicek.rourka.ci.PipelineDescription;
 import com.github.ladicek.rourka.ci.PipelineType;
 import com.github.ladicek.rourka.jenkins.JenkinsDataProvider;
@@ -31,22 +32,24 @@ public class IndexResource {
     public View get() throws Exception {
         JenkinsDataProvider jenkinsDataProvider=new JenkinsDataProvider(httpClient);
         List<Job> jobs=jenkinsDataProvider.getJobs();
+        List<PipelineType> header = new ArrayList<>();
 
-        Map<PipelineDescription, Map<PipelineType, BuildResult>> table = new LinkedHashMap<>();
+        Map<Cluster, Map<PipelineDescription, Map<PipelineType, BuildResult>>> tables = new LinkedHashMap<>();
 
-        // TODO: figure out how to do a description and type passing
         for (Job job : jobs){
-            PipelineDescription desc = new PipelineDescription(job.getDescription());
-            PipelineType type = new PipelineType("type placeholder");
-            table.computeIfAbsent(desc, ignored -> new LinkedHashMap<>()).put(type, job.getLastBuildResult());
+            Map<PipelineDescription, Map<PipelineType, BuildResult>> table =
+                    tables.computeIfAbsent(job.getCluster(), k -> new LinkedHashMap<>());
+
+            if (!header.contains(job.getType())){
+                header.add(job.getType());
+            }
+
+            table.computeIfAbsent(job.getDescription(), ignored -> new LinkedHashMap<>()).put(job.getType(), job.getLastBuildResult());
         }
 
-        List<PipelineType> header = new ArrayList<>();
-        header.add(new PipelineType("type placeholder"));
-
-
+        System.out.println("Table data: " + tables);
         return new View("index.html",
-                "table", table,
+                "tables", tables,
                 "header", header,
                 "now", LocalDateTime.now()
         );

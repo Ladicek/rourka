@@ -11,6 +11,7 @@ public enum BuildStatus {
             case "SUCCESS":
                 return BuildStatus.PASS;
             case "FAILED":
+            case "FAILURE":
                 return BuildStatus.FAIL;
             default:
                 return BuildStatus.UNKNOWN;

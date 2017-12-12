@@ -1,6 +1,9 @@
 package com.github.ladicek.rourka.jenkins;
 
 import com.github.ladicek.rourka.ci.BuildResult;
+import com.github.ladicek.rourka.ci.Cluster;
+import com.github.ladicek.rourka.ci.PipelineDescription;
+import com.github.ladicek.rourka.ci.PipelineType;
 
 public class Job {
 
@@ -9,7 +12,9 @@ public class Job {
     private String url;
     private String color;
 
-    private String description;
+    private PipelineDescription description;
+    private PipelineType type;
+    private Cluster cluster;
     private BuildResult lastBuildResult;
 
     public Job(String jobClass, String name, String url, String color) {
@@ -35,14 +40,6 @@ public class Job {
         return color;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public BuildResult getLastBuildResult() {
         return lastBuildResult;
     }
@@ -51,12 +48,38 @@ public class Job {
         this.lastBuildResult = lastBuildResult;
     }
 
+    public PipelineDescription getDescription() {
+        return description;
+    }
+
+    public void setDescription(PipelineDescription description) {
+        this.description = description;
+    }
+
+    public PipelineType getType() {
+        return type;
+    }
+
+    public void setType(PipelineType type) {
+        this.type = type;
+    }
+
+    public Cluster getCluster() {
+        return cluster;
+    }
+
+    public void setCluster(Cluster cluster) {
+        this.cluster = cluster;
+    }
+
     public String toString(){
         return "class: " + jobClass
                 + ", name: " + name
                 + ", url: " + url
                 + ", color: " + color
                 + ", description: " + description
+                + ", type: " + type
+                + ", cluster: " + cluster
                 + ", last build result: " + lastBuildResult;
     }
 }

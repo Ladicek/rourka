@@ -10,6 +10,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
+import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.StringReader;
 import java.time.Instant;
@@ -26,6 +27,8 @@ public class JenkinsDataProvider {
         executor = Executor.newInstance(httpClient);
     }
 
+    private final String jenkinsUrl="http://jenkins";
+
     /**
      * List all jobs (builds) in jenkins and their last build results
      * @return List of all jobs
@@ -34,7 +37,7 @@ public class JenkinsDataProvider {
     public List<Job> getJobs() throws IOException {
 
         // get jobs from jenkins
-        JsonObject page= getJsonApiPage("http://jenkins");
+        JsonObject page= getJsonApiPage(jenkinsUrl);
         JsonArray jsonJobs = page.getJsonArray("jobs");
 
         List<Job> jobs=new ArrayList<>();
@@ -66,13 +69,15 @@ public class JenkinsDataProvider {
     private void fillJobBuildInfo(Job job) throws IOException
     {
         JsonObject jobInfo = getJsonApiPage(job.getUrl());
+
+        // TODO: description will probably be different (maybe it will be JSON)
         job.setDescription(readStringOrNull(jobInfo,"description"));
 
         JsonValue lastBuild = jobInfo.get("lastBuild");
 
         // if none build has been made, enter unknown status
         if (lastBuild.equals(JsonValue.NULL)){
-            job.setLastBuildResult(new BuildResult(BuildStatus.UNKNOWN,null,null,null));
+            job.setLastBuildResult(new BuildResult(BuildStatus.UNKNOWN,0,null,null));
         }
         else {
             // if any build has been made, enter it's status
@@ -81,8 +86,8 @@ public class JenkinsDataProvider {
 
             BuildResult lastBuildResult = new BuildResult(
                     BuildStatus.fromString(readStringOrNull(lastBuildPage, "result")),
-                    lastBuildPage.getString("fullDisplayName"),
-                    lastBuildPage.getString("url"),
+                    lastBuildNumber,
+                    buildConsoleOutputUrl(job,lastBuildNumber),
 
                     // parse the milisecond timestamp from json page into LocalDateTime
                     LocalDateTime.ofInstant(Instant.ofEpochMilli(Integer.toUnsignedLong((lastBuildPage.getInt("timestamp")))),
@@ -110,6 +115,11 @@ public class JenkinsDataProvider {
         return executor.execute(Request.Get(url)).returnContent().asString();
     }
 
+    private String buildConsoleOutputUrl(Job job,int lastBuildNumber)
+    {
+        return "/console-text/" + job.getName() + "/" + lastBuildNumber;
+    }
+
     /**
      * Read json String object, which can possibly be NULL
      * @param object Json object to find data in
@@ -132,8 +142,10 @@ public class JenkinsDataProvider {
      * @return Plain text content of the output console
      * @throws IOException if connection to jenkins fails
      */
-    public String readConsoleOutput(String buildName) throws IOException
+    public StreamingOutput readConsoleOutput(String buildName, String buildNumber) throws IOException
     {
-        return getStringApiPage(buildName + "consoleText");
+        String url=jenkinsUrl + "/job/" + buildName + "/" + buildNumber + "/consoleText";
+        System.out.println("console output url: " + url);
+        return output -> executor.execute(Request.Get(url)).returnResponse().getEntity().writeTo(output);
     }
 }

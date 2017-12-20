@@ -8,12 +8,16 @@ import java.time.LocalDateTime;
 public final class BuildResult {
     private final BuildStatus status;
     private final String link;
+    private final String buildLink;
     private final LocalDateTime timestamp;
     private int buildNumber;
+    private Boolean building; //is the build running right now
 
-    public BuildResult(BuildStatus status, int buildNumber, String link, LocalDateTime timestamp) {
+    public BuildResult(BuildStatus status, int buildNumber, String link, String buildLink, Boolean building, LocalDateTime timestamp) {
         this.status = status;
         this.link = link;
+        this.buildLink = buildLink;
+        this.building=building;
         this.timestamp = timestamp;
         this.buildNumber= buildNumber;
     }
@@ -34,11 +38,23 @@ public final class BuildResult {
         return timestamp;
     }
 
+    public String getBuildLink() {
+        return buildLink;
+    }
+
+    public Boolean isBuilding() {
+        if (building == null){
+            return false;
+        }
+        return building;
+    }
+
     public String toString()
     {
         return "Build Status: " + status
                 + ", buildNumber: " + buildNumber
                 + ", link: " + link
+                + ", building: " + building
                 + ", timestamp: " + timestamp;
     }
 }

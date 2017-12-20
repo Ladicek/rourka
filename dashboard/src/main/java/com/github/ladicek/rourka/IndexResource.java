@@ -4,9 +4,10 @@ import com.github.ladicek.rourka.ci.BuildResult;
 import com.github.ladicek.rourka.ci.Cluster;
 import com.github.ladicek.rourka.ci.PipelineDescription;
 import com.github.ladicek.rourka.ci.PipelineType;
+import com.github.ladicek.rourka.jenkins.JenkinsAuthorizedHttpClient;
 import com.github.ladicek.rourka.jenkins.JenkinsDataProvider;
+import com.github.ladicek.rourka.jenkins.JenkinsRequestHandler;
 import com.github.ladicek.rourka.jenkins.Job;
-import com.github.ladicek.rourka.openshift.TokenAuthorizingHttpClient;
 import com.github.ladicek.rourka.thymeleaf.View;
 import org.apache.http.impl.client.CloseableHttpClient;
 
@@ -23,14 +24,15 @@ import java.util.Map;
 
 @Path("/")
 public class IndexResource {
+
     @Inject
-    @TokenAuthorizingHttpClient
+    @JenkinsAuthorizedHttpClient
     private CloseableHttpClient httpClient;
 
     @GET
     @Produces(MediaType.TEXT_HTML)
     public View get() throws Exception {
-        JenkinsDataProvider jenkinsDataProvider=new JenkinsDataProvider(httpClient);
+        JenkinsDataProvider jenkinsDataProvider=new JenkinsDataProvider(new JenkinsRequestHandler(httpClient));
         List<Job> jobs=jenkinsDataProvider.getJobs();
         List<PipelineType> header = new ArrayList<>();
 
@@ -47,7 +49,6 @@ public class IndexResource {
             table.computeIfAbsent(job.getDescription(), ignored -> new LinkedHashMap<>()).put(job.getType(), job.getLastBuildResult());
         }
 
-        System.out.println("Table data: " + tables);
         return new View("index.html",
                 "tables", tables,
                 "header", header,

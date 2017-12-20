@@ -77,6 +77,10 @@
                     <th:block th:if="${cell.link != null}">
                         (<a href="#" target="_blank" th:href="${cell.link}" th:text="'build #' + ${cell.buildNumber}">build #0</a>)
                     </th:block>
+                    <span th:if="${cell.building}">Build running</span>
+                    <span th:if="!${cell.building}">
+                        <a href="#" target="_blank" th:href="${cell.buildLink}">Start build</a>
+                    </span>
                     <span class="timestamp" th:if="${cell.timestamp != null}" th:text="${#temporals.format(cell.timestamp, 'yyyy-MM-dd HH:mm')}">yyyy-MM-dd HH:mm</span>
                 </span>
             </td>

@@ -1,9 +1,6 @@
 package com.github.ladicek.rourka.jenkins;
 
 import com.github.ladicek.rourka.ci.*;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.fluent.Executor;
-import org.apache.http.client.fluent.Request;
 
 import javax.json.*;
 import javax.ws.rs.core.StreamingOutput;
@@ -16,14 +13,11 @@ import java.util.List;
 import java.util.TimeZone;
 
 public class JenkinsDataProvider {
+    private JenkinsRequestHandler jenkinsRequestHandler;
 
-    private Executor executor;
-
-    public JenkinsDataProvider(HttpClient httpClient){
-        executor = Executor.newInstance(httpClient);
+    public JenkinsDataProvider (JenkinsRequestHandler jenkinsRequestHandler){
+        this.jenkinsRequestHandler= jenkinsRequestHandler;
     }
-
-    private final String jenkinsUrl="http://jenkins";
 
     /**
      * List all jobs (builds) in jenkins and their last build results
@@ -31,10 +25,10 @@ public class JenkinsDataProvider {
      * @throws IOException If connection to jenkins fails
      */
     public List<Job> getJobs() throws IOException {
-
         // get jobs from jenkins
-        JsonObject page= getJsonApiPage(jenkinsUrl);
+        JsonObject page = jenkinsRequestHandler.getJsonApiPage("");
         JsonArray jsonJobs = page.getJsonArray("jobs");
+
 
         List<Job> jobs=new ArrayList<>();
         // parse json into job objects
@@ -64,8 +58,7 @@ public class JenkinsDataProvider {
      */
     private void fillJobBuildInfo(Job job) throws IOException
     {
-        JsonObject jobInfo = getJsonApiPage(job.getUrl());
-
+        JsonObject jobInfo = jenkinsRequestHandler.getFullUrlJsonApiPage(job.getUrl());
 
         // parse JSON present in description
         parseJobDescrption(job,jobInfo);
@@ -74,17 +67,19 @@ public class JenkinsDataProvider {
 
         // if none build has been made, enter unknown status
         if (lastBuild.equals(JsonValue.NULL)){
-            job.setLastBuildResult(new BuildResult(BuildStatus.UNKNOWN,0,null,null));
+            job.setLastBuildResult(new BuildResult(BuildStatus.UNKNOWN,0,null,null,null,null));
         }
         else {
             // if any build has been made, enter it's status
             int lastBuildNumber = jobInfo.getJsonObject("lastBuild").getInt("number");
-            JsonObject lastBuildPage = getJsonApiPage(job.getUrl() + lastBuildNumber + "/");
+            JsonObject lastBuildPage = jenkinsRequestHandler.getFullUrlJsonApiPage(job.getUrl() + lastBuildNumber + "/");
 
             BuildResult lastBuildResult = new BuildResult(
                     BuildStatus.fromString(readStringOrNull(lastBuildPage, "result")),
                     lastBuildNumber,
                     buildConsoleOutputUrl(job,lastBuildNumber),
+                    buildBuildUrl(job),
+                    readBooleanOrNull(lastBuildPage, "building"),
 
                     // parse the milisecond timestamp from json page into LocalDateTime
                     LocalDateTime.ofInstant(
@@ -128,26 +123,25 @@ public class JenkinsDataProvider {
     }
 
     /**
-     * Read Json from Jenkins and store it to object
-     * @param url URL of the page, that will be read
-     *      This method adds the suffix "/api"json" to read json content of the page
-     * @return Json representation of the data on page
-     * @throws IOException Throws if reading of page fails
+     * Get content of the output console for one specific build
+     * @param buildName Name of the build
+     * @return Plain text content of the output console
+     * @throws IOException if connection to jenkins fails
      */
-    private JsonObject getJsonApiPage(String url) throws IOException
+    public StreamingOutput readConsoleOutput(String buildName, String buildNumber) throws IOException
     {
-        String json = getStringApiPage(url + "/api/json");
-        return Json.createReader(new StringReader(json)).readObject();
+        return jenkinsRequestHandler.readConsoleOutput("/job/" + buildName + "/" + buildNumber + "/consoleText");
     }
 
-    private String getStringApiPage(String url) throws IOException
-    {
-        return executor.execute(Request.Get(url)).returnContent().asString();
-    }
 
     private String buildConsoleOutputUrl(Job job,int lastBuildNumber)
     {
         return "/console-text/" + job.getName() + "/" + lastBuildNumber;
+    }
+
+    private String buildBuildUrl(Job job)
+    {
+        return "/build/" + job.getName();
     }
 
     /**
@@ -166,15 +160,13 @@ public class JenkinsDataProvider {
         }
     }
 
-    /**
-     * Get content of the output console for one specific build
-     * @param buildName Name of the build
-     * @return Plain text content of the output console
-     * @throws IOException if connection to jenkins fails
-     */
-    public StreamingOutput readConsoleOutput(String buildName, String buildNumber) throws IOException
+    private Boolean readBooleanOrNull(JsonObject object, String attribute)
     {
-        String url=jenkinsUrl + "/job/" + buildName + "/" + buildNumber + "/consoleText";
-        return output -> executor.execute(Request.Get(url)).returnResponse().getEntity().writeTo(output);
+        JsonValue jsonValue=object.get(attribute);
+        if(jsonValue.getValueType().equals(JsonValue.ValueType.NULL)){
+            return null;
+        } else {
+            return object.getBoolean(attribute);
+        }
     }
 }

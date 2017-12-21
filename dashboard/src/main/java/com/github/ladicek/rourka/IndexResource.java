@@ -22,42 +22,42 @@ import java.util.Map;
 @Path("/")
 public class IndexResource {
 
-	@Inject
-	@TokenAuthorizingHttpClient
-	private CloseableHttpClient httpClient;
+    @Inject
+    @TokenAuthorizingHttpClient
+    private CloseableHttpClient httpClient;
 
-	@GET
-	@Produces(MediaType.TEXT_HTML)
-	public View get() throws Exception {
-		JenkinsDataProvider jenkinsDataProvider=new JenkinsDataProvider(new JenkinsRequestHandler(httpClient));
-		List<Job> jobs=jenkinsDataProvider.getJobs();
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public View get() throws Exception {
+        JenkinsDataProvider jenkinsDataProvider=new JenkinsDataProvider(new JenkinsRequestHandler(httpClient));
+        List<Job> jobs=jenkinsDataProvider.getJobs();
 
-		// declare output variables
-		List<PipelineType> header = new ArrayList<>();
-		Map<Cluster, Map<PipelineDescription, Map<PipelineType, Job>>> tables = new LinkedHashMap<>();
+        // declare output variables
+        List<PipelineType> header = new ArrayList<>();
+        Map<Cluster, Map<PipelineDescription, Map<PipelineType, Job>>> tables = new LinkedHashMap<>();
 
-		// fill output structure with jobs
-		for (Job job : jobs){
-			if (!job.getDescription().toString().equals(ValueWrapper.emptyValue)) {
-				// create or select table (representing cluster)
-				Map<PipelineDescription, Map<PipelineType, Job>> table =
-						tables.computeIfAbsent(job.getCluster(), k -> new LinkedHashMap<>());
+        // fill output structure with jobs
+        for (Job job : jobs){
+            if (!job.getDescription().toString().equals(ValueWrapper.emptyValue)) {
+                // create or select table (representing cluster)
+                Map<PipelineDescription, Map<PipelineType, Job>> table =
+                        tables.computeIfAbsent(job.getCluster(), k -> new LinkedHashMap<>());
 
-				// add job type to the header, if not already present
-				if (!header.contains(job.getType())){
-					header.add(job.getType());
-				}
+                // add job type to the header, if not already present
+                if (!header.contains(job.getType())){
+                    header.add(job.getType());
+                }
 
-				// insert job into table
-				// insert only if description is present => job is annotated as a build that should be displayed
-				table.computeIfAbsent(job.getDescription(), ignored -> new LinkedHashMap<>()).put(job.getType(), job);
-			}
-		}
+                // insert job into table
+                // insert only if description is present => job is annotated as a build that should be displayed
+                table.computeIfAbsent(job.getDescription(), ignored -> new LinkedHashMap<>()).put(job.getType(), job);
+            }
+        }
 
-		return new View("index.html",
-				"tables", tables,
-				"header", header,
-				"now", LocalDateTime.now()
-		);
-	}
+        return new View("index.html",
+                "tables", tables,
+                "header", header,
+                "now", LocalDateTime.now()
+        );
+    }
 }

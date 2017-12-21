@@ -15,21 +15,21 @@ import javax.ws.rs.Produces;
 @Path("/build/{name}")
 public class BuildResource {
 
-	@Inject
-	@TokenAuthorizingHttpClient
-	private CloseableHttpClient httpClient;
+    @Inject
+    @TokenAuthorizingHttpClient
+    private CloseableHttpClient httpClient;
 
-	@GET
-	@Produces("text/plain;charset=utf-8")
-	public String get(@PathParam("name") String buildName) throws Exception {
-		JenkinsBuildRunner jenkinsBuildRunner = new JenkinsBuildRunner(new JenkinsRequestHandler(httpClient));
+    @GET
+    @Produces("text/plain;charset=utf-8")
+    public String get(@PathParam("name") String buildName) throws Exception {
+        JenkinsBuildRunner jenkinsBuildRunner = new JenkinsBuildRunner(new JenkinsRequestHandler(httpClient));
 
-		HttpResponse response= jenkinsBuildRunner.startBuild(buildName);
-		if (response.getStatusLine().getStatusCode() == 302)
-		{
-			return "Build started";
-		} else {
-			return "Failed to start build, response: " + response.toString();
-		}
-	}
+        HttpResponse response= jenkinsBuildRunner.startBuild(buildName);
+        if (response.getStatusLine().getStatusCode() == 302)
+        {
+            return "Build started";
+        } else {
+            return "Failed to start build, response: " + response.toString();
+        }
+    }
 }

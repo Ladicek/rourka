@@ -1,13 +1,10 @@
 package com.github.ladicek.rourka;
 
-import com.github.ladicek.rourka.ci.BuildResult;
-import com.github.ladicek.rourka.ci.Cluster;
-import com.github.ladicek.rourka.ci.PipelineDescription;
-import com.github.ladicek.rourka.ci.PipelineType;
-import com.github.ladicek.rourka.jenkins.JenkinsAuthorizedHttpClient;
+import com.github.ladicek.rourka.ci.*;
 import com.github.ladicek.rourka.jenkins.JenkinsDataProvider;
 import com.github.ladicek.rourka.jenkins.JenkinsRequestHandler;
 import com.github.ladicek.rourka.jenkins.Job;
+import com.github.ladicek.rourka.openshift.TokenAuthorizingHttpClient;
 import com.github.ladicek.rourka.thymeleaf.View;
 import org.apache.http.impl.client.CloseableHttpClient;
 
@@ -25,34 +22,42 @@ import java.util.Map;
 @Path("/")
 public class IndexResource {
 
-    @Inject
-    @JenkinsAuthorizedHttpClient
-    private CloseableHttpClient httpClient;
+	@Inject
+	@TokenAuthorizingHttpClient
+	private CloseableHttpClient httpClient;
 
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public View get() throws Exception {
-        JenkinsDataProvider jenkinsDataProvider=new JenkinsDataProvider(new JenkinsRequestHandler(httpClient));
-        List<Job> jobs=jenkinsDataProvider.getJobs();
-        List<PipelineType> header = new ArrayList<>();
+	@GET
+	@Produces(MediaType.TEXT_HTML)
+	public View get() throws Exception {
+		JenkinsDataProvider jenkinsDataProvider=new JenkinsDataProvider(new JenkinsRequestHandler(httpClient));
+		List<Job> jobs=jenkinsDataProvider.getJobs();
 
-        Map<Cluster, Map<PipelineDescription, Map<PipelineType, BuildResult>>> tables = new LinkedHashMap<>();
+		// declare output variables
+		List<PipelineType> header = new ArrayList<>();
+		Map<Cluster, Map<PipelineDescription, Map<PipelineType, Job>>> tables = new LinkedHashMap<>();
 
-        for (Job job : jobs){
-            Map<PipelineDescription, Map<PipelineType, BuildResult>> table =
-                    tables.computeIfAbsent(job.getCluster(), k -> new LinkedHashMap<>());
+		// fill output structure with jobs
+		for (Job job : jobs){
+			if (!job.getDescription().toString().equals(ValueWrapper.emptyValue)) {
+				// create or select table (representing cluster)
+				Map<PipelineDescription, Map<PipelineType, Job>> table =
+						tables.computeIfAbsent(job.getCluster(), k -> new LinkedHashMap<>());
 
-            if (!header.contains(job.getType())){
-                header.add(job.getType());
-            }
+				// add job type to the header, if not already present
+				if (!header.contains(job.getType())){
+					header.add(job.getType());
+				}
 
-            table.computeIfAbsent(job.getDescription(), ignored -> new LinkedHashMap<>()).put(job.getType(), job.getLastBuildResult());
-        }
+				// insert job into table
+				// insert only if description is present => job is annotated as a build that should be displayed
+				table.computeIfAbsent(job.getDescription(), ignored -> new LinkedHashMap<>()).put(job.getType(), job);
+			}
+		}
 
-        return new View("index.html",
-                "tables", tables,
-                "header", header,
-                "now", LocalDateTime.now()
-        );
-    }
+		return new View("index.html",
+				"tables", tables,
+				"header", header,
+				"now", LocalDateTime.now()
+		);
+	}
 }

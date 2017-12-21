@@ -11,6 +11,7 @@ public class Job {
     private String name;
     private String url;
     private String color;
+    private String buildLink;
 
     private PipelineDescription description;
     private PipelineType type;
@@ -72,10 +73,19 @@ public class Job {
         this.cluster = cluster;
     }
 
+    public void setBuildLink(String buildLink) {
+        this.buildLink = buildLink;
+    }
+
+    public String getBuildLink() {
+        return buildLink;
+    }
+
     public String toString(){
         return "class: " + jobClass
                 + ", name: " + name
                 + ", url: " + url
+                + ", build link: " + buildLink
                 + ", color: " + color
                 + ", description: " + description
                 + ", type: " + type

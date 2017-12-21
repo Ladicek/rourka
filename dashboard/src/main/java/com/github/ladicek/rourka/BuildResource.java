@@ -1,8 +1,8 @@
 package com.github.ladicek.rourka;
 
-import com.github.ladicek.rourka.jenkins.JenkinsAuthorizedHttpClient;
 import com.github.ladicek.rourka.jenkins.JenkinsBuildRunner;
 import com.github.ladicek.rourka.jenkins.JenkinsRequestHandler;
+import com.github.ladicek.rourka.openshift.TokenAuthorizingHttpClient;
 import org.apache.http.HttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
 
@@ -14,23 +14,22 @@ import javax.ws.rs.Produces;
 
 @Path("/build/{name}")
 public class BuildResource {
-    private JenkinsBuildRunner jenkinsBuildRunner;
 
-    @Inject
-    @JenkinsAuthorizedHttpClient
-    private CloseableHttpClient httpClient;
+	@Inject
+	@TokenAuthorizingHttpClient
+	private CloseableHttpClient httpClient;
 
-    @GET
-    @Produces("text/plain;charset=utf-8")
-    public String get(@PathParam("name") String buildName) throws Exception {
-        jenkinsBuildRunner = new JenkinsBuildRunner(new JenkinsRequestHandler(httpClient));
+	@GET
+	@Produces("text/plain;charset=utf-8")
+	public String get(@PathParam("name") String buildName) throws Exception {
+		JenkinsBuildRunner jenkinsBuildRunner = new JenkinsBuildRunner(new JenkinsRequestHandler(httpClient));
 
-        HttpResponse response=jenkinsBuildRunner.startBuild(buildName);
-        if (response.getStatusLine().getStatusCode() == 302)
-        {
-            return "Build started";
-        } else {
-            return "Failed to start build, response: " + response.toString();
-        }
-    }
+		HttpResponse response= jenkinsBuildRunner.startBuild(buildName);
+		if (response.getStatusLine().getStatusCode() == 302)
+		{
+			return "Build started";
+		} else {
+			return "Failed to start build, response: " + response.toString();
+		}
+	}
 }

@@ -7,7 +7,7 @@ RUN yum -y install epel-release && \
     yum -y install jq && \
     yum clean all -y
 
-ADD ./startup /usr/local/bin
+COPY startup /usr/local/bin/
 
 USER 1001
 

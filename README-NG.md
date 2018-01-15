@@ -1,6 +1,6 @@
 `oc project xxx` or `oc new-project xxx`
 
-`for S in $(ls secrets/actual*) ; do oc create -f $S ; done`
+`for S in $(ls secrets/*.yml) ; do oc create -f $S ; done`
 
 ```bash
 oc create -f jenkins-master/image-stream.yml

@@ -2,6 +2,15 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <style>
+        .cluster{
+            margin-top:10px;
+            border:1px solid black;
+        }
+
+        .cluster:first-of-type{
+            margin-top:0px;
+        }
+
         table {
             border-collapse: collapse;
             text-align: left;
@@ -19,22 +28,22 @@
         td .timestamp {
             font-size: 70%;
         }
-        td.cell-PASS {
+        .cell-PASS {
             background-color: lightgreen;
         }
-        td.cell-FAIL {
+        .cell-FAIL {
             background-color: lightpink;
         }
-        td.cell-UNKNOWN {
+        .cell-UNKNOWN {
             background-color: lightgrey;
         }
-        tr:hover td.cell-PASS {
+        tr:hover td .cell-PASS {
             background-color: green;
         }
-        tr:hover td.cell-FAIL {
+        tr:hover td .cell-FAIL {
             background-color: red;
         }
-        tr:hover td.cell-UNKNOWN {
+        tr:hover td .cell-UNKNOWN {
             background-color: grey;
         }
         p.generated-at {
@@ -46,28 +55,39 @@
 <body>
 
 <!--/*@thymesVar id="header" type="java.util.List<com.github.ladicek.rourka.ci.PipelineType>"*/-->
-<!--/*@thymesVar id="table" type="java.util.Map<com.github.ladicek.rourka.ci.PipelineDescription, Map<com.github.ladicek.rourka.ci.PipelineType,com.github.ladicek.rourka.ci.BuildResult>>"*/-->
-<table>
-    <thead>
-    <tr>
-        <th></th>
-        <th th:each="column : ${header}" th:text="${column}">CI Type</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="row : ${table}">
-        <th class="booster" th:text="${row.key}">Runtime Name | ID: Mission Name</th>
-        <td th:each="column : ${header}" th:if="${row.value[column] != null}" th:with="cell = ${row.value[column]}" th:classappend="'cell-' + ${cell.status}">
-            <span th:text="${cell.status}">STATUS</span>
-            <th:block th:if="${cell.name != null}">
-                (<a href="#" target="_blank" th:href="${cell.link}" th:text="'build ' + ${cell.name}">build #0</a>)
-            </th:block>
-            <span class="timestamp" th:if="${cell.timestamp != null}" th:text="${#temporals.format(cell.timestamp, 'yyyy-MM-dd HH:mm')}">yyyy-MM-dd HH:mm</span>
-        </td>
-    </tr>
-    </tbody>
-</table>
-
+<!--/*@thymesVar id="tables" type="java.util.Map<com.github.ladicek.rourka.ci.Cluster,java.util.Map<com.github.ladicek.rourka.ci.PipelineDescription, Map<com.github.ladicek.rourka.ci.PipelineType,com.github.ladicek.rourka.ci.BuildResult>>>"*/-->
+<div class="cluster" th:each="table : ${tables}">
+    <h4>
+        Cluster name: <span th:text="${table.key}">Cluster name</span>
+    </h4>
+    <table>
+        <thead>
+        <tr>
+            <th></th>
+            <th th:each="column : ${header}" th:text="${column}">CI Type</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="row : ${table.value}">
+            <th class="booster" th:text="${row.key}">Runtime Name | ID: Mission Name</th>
+            <td th:each="column : ${header}">
+                <!--If cell is empty, display it empty, else fill it -->
+                <span th:if="${row.value[column] != null}" th:with="job = ${row.value[column]}" th:classappend="'cell-' + ${job.lastBuildResult.status}">
+                    <span th:text="${job.lastBuildResult.status}">STATUS</span>
+                    <th:block th:if="${job.lastBuildResult.link != null}">
+                        (<a href="#" target="_blank" th:href="${job.lastBuildResult.link}" th:text="'build #' + ${job.lastBuildResult.buildNumber}">build #0</a>)
+                    </th:block>
+                    <span th:if="${job.lastBuildResult.building}">Build running</span>
+                    <span th:if="!${job.lastBuildResult.building}">
+                        <a href="#" target="_blank" th:href="${job.buildLink}">Start build</a>
+                    </span>
+                    <span class="timestamp" th:if="${job.lastBuildResult.timestamp != null}" th:text="${#temporals.format(job.lastBuildResult.timestamp, 'yyyy-MM-dd HH:mm')}">yyyy-MM-dd HH:mm</span>
+                </span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
 <!--/*@thymesVar id="now" type="java.time.LocalDateTime"*/-->
 <p class="generated-at">Generated at <span th:text="${#temporals.format(now, 'yyyy-MM-dd HH:mm')}">yyyy-MM-dd HH:mm</span>.</p>
 

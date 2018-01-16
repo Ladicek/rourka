@@ -8,11 +8,14 @@ import com.github.ladicek.rourka.ci.TestResult;
 import com.github.ladicek.rourka.ci.TestType;
 import com.github.ladicek.rourka.openshift.TokenAuthorizingHttpClient;
 import com.google.gson.Gson;
+import io.fabric8.openshift.client.OpenShiftClient;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.wildfly.swarm.spi.runtime.annotations.ConfigurationValue;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import java.io.IOException;
@@ -28,7 +31,17 @@ public class JenkinsClient {
     @TokenAuthorizingHttpClient
     private CloseableHttpClient httpClient;
 
-    private String jenkinsBaseUrl = "http://jenkins"; // TODO
+    @Inject
+    @ConfigurationValue("rourka.jenkins.url")
+    private String jenkinsBaseUrl;
+
+    @PostConstruct
+    public void init() {
+        if (jenkinsBaseUrl == null) {
+            // default inside OpenShift
+            jenkinsBaseUrl = "http://jenkins/";
+        }
+    }
 
     public List<Job> getRelevantJobs() throws IOException {
         String url = jenkinsUrl("/api/json?tree=jobs[name,description,lastCompletedBuild[number,timestamp,result],lastBuild[building]]");

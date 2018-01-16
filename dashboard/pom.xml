@@ -16,6 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+        <version.com.google.code.gson>2.8.2</version.com.google.code.gson>
         <version.io.fabric8.maven-plugin>3.5.33</version.io.fabric8.maven-plugin>
         <version.io.fabric8.openshift-client>3.1.0</version.io.fabric8.openshift-client>
         <version.org.apache.httpcomponents.fluent-hc>4.5.3</version.org.apache.httpcomponents.fluent-hc>
@@ -69,6 +70,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${version.com.google.code.gson}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>fluent-hc</artifactId>
             <version>${version.org.apache.httpcomponents.fluent-hc}</version>
@@ -83,6 +90,13 @@
 
     <build>
         <finalName>${project.artifactId}</finalName>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
 
         <plugins>
             <plugin>

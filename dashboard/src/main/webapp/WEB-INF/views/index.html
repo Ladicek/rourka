@@ -2,6 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <style>
+        .cluster {
+            margin-bottom: 2em;
+        }
+        .cluster h2 {
+            margin: 0;
+        }
+
         table {
             border-collapse: collapse;
             text-align: left;
@@ -42,31 +49,46 @@
             font-size: 70%;
         }
     </style>
+    <title>Rourka</title>
 </head>
 <body>
 
-<!--/*@thymesVar id="header" type="java.util.List<com.github.ladicek.rourka.ci.PipelineType>"*/-->
-<!--/*@thymesVar id="table" type="java.util.Map<com.github.ladicek.rourka.ci.PipelineDescription, Map<com.github.ladicek.rourka.ci.PipelineType,com.github.ladicek.rourka.ci.BuildResult>>"*/-->
-<table>
-    <thead>
-    <tr>
-        <th></th>
-        <th th:each="column : ${header}" th:text="${column}">CI Type</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="row : ${table}">
-        <th class="booster" th:text="${row.key}">Runtime Name | ID: Mission Name</th>
-        <td th:each="column : ${header}" th:if="${row.value[column] != null}" th:with="cell = ${row.value[column]}" th:classappend="'cell-' + ${cell.status}">
-            <span th:text="${cell.status}">STATUS</span>
-            <th:block th:if="${cell.name != null}">
-                (<a href="#" target="_blank" th:href="${cell.link}" th:text="'build ' + ${cell.name}">build #0</a>)
+<!--/*@thymesVar id="header" type="java.util.List<com.github.ladicek.rourka.ci.TestType>"*/-->
+<!--/*@thymesVar id="tables" type="java.util.Map<com.github.ladicek.rourka.ci.TestCluster,java.util.Map<com.github.ladicek.rourka.ci.TestDescription, Map<com.github.ladicek.rourka.ci.TestType,com.github.ladicek.rourka.ci.TestResult>>>"*/-->
+<div class="cluster" th:each="table : ${tables}">
+    <h2 th:text="${table.key}">Cluster name</h2>
+    <table>
+        <thead>
+        <tr>
+            <th></th>
+            <th th:each="column : ${header}" th:text="${column}">CI Type</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="row : ${table.value}">
+            <th class="booster" th:text="${row.key}">Runtime Name | ID: Mission Name</th>
+            <th:block th:each="column : ${header}">
+                <td th:if="${row.value[column] != null}" th:with="cell = ${row.value[column]}" th:classappend="'cell-' + ${cell.status}">
+                    <span th:text="${cell.status}">STATUS</span>
+                    <th:block th:if="${cell.link != null}">
+                        (<a href="#" target="_blank" th:href="${cell.link}" th:text="'build #' + ${cell.buildNumber}">build #0</a>)
+                    </th:block>
+                    <span class="timestamp" th:if="${cell.timestamp != null}" th:text="${#temporals.format(cell.timestamp, 'yyyy-MM-dd HH:mm')}">yyyy-MM-dd HH:mm</span>
+                    <!--/*<img th:if="${cell.anotherBuildRunningNow}" alt="Another build is running now" title="Another build is running now" width="16" height="16" src="/static/spinner.gif"/>*/-->
+                    <img th:if="${cell.anotherBuildRunningNow}" alt="Another build is running now" title="Another build is running now" width="16" height="16" src="data:image/gif;base64,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">
+                    <!--/* TODO */-->
+                    <!--/*
+                    <span th:if="!${cell.anotherBuildRunningNow}">
+                        <a href="#" target="_blank" th:href="${job.buildLink}">Start build</a>
+                    </span>
+                    */-->
+                </td>
+                <td th:if="${row.value[column] == null}"></td>
             </th:block>
-            <span class="timestamp" th:if="${cell.timestamp != null}" th:text="${#temporals.format(cell.timestamp, 'yyyy-MM-dd HH:mm')}">yyyy-MM-dd HH:mm</span>
-        </td>
-    </tr>
-    </tbody>
-</table>
+        </tr>
+        </tbody>
+    </table>
+</div>
 
 <!--/*@thymesVar id="now" type="java.time.LocalDateTime"*/-->
 <p class="generated-at">Generated at <span th:text="${#temporals.format(now, 'yyyy-MM-dd HH:mm')}">yyyy-MM-dd HH:mm</span>.</p>

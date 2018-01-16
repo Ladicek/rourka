@@ -3,12 +3,12 @@ package com.github.ladicek.rourka.ci;
 import java.util.Objects;
 
 /**
- * Column of the CI status table.
+ * Row of the CI status table.
  */
-public final class PipelineType {
+public final class TestDescription {
     private final String value;
 
-    public PipelineType(String value) {
+    public TestDescription(String value) {
         this.value = value;
     }
 
@@ -20,8 +20,8 @@ public final class PipelineType {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PipelineType)) return false;
-        PipelineType that = (PipelineType) o;
+        if (!(o instanceof TestDescription)) return false;
+        TestDescription that = (TestDescription) o;
         return Objects.equals(value, that.value);
     }
 

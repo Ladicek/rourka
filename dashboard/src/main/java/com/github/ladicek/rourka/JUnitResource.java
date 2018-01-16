@@ -1,42 +1,17 @@
 package com.github.ladicek.rourka;
 
-import com.github.ladicek.rourka.openshift.TokenAuthorizingHttpClient;
-import io.fabric8.openshift.api.model.Build;
-import io.fabric8.openshift.api.model.BuildConfig;
-import io.fabric8.openshift.client.OpenShiftClient;
-import org.apache.http.client.fluent.Executor;
-import org.apache.http.client.fluent.Request;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.joox.Match;
-import org.xml.sax.SAXException;
-
-import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonObject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
-import static org.joox.JOOX.$;
-
-@Path("/junit")
+@Path("/junit") // TODO need to rewrite on top of Jenkins instead of OpenShift
 public class JUnitResource {
+    @GET
+    public Response get() {
+        return Response.serverError().build();
+    }
+
+/*
     @Inject
     private OpenShiftClient oc;
 
@@ -167,4 +142,5 @@ public class JUnitResource {
                         "</testsuite>");
         return Collections.singletonList(result);
     }
+*/
 }

@@ -24,7 +24,7 @@ public class TokenAuthorizingHttpClientProducer {
     @Produces
     @RequestScoped
     @TokenAuthorizingHttpClient
-    public CloseableHttpClient createHttpClient() throws IOException, GeneralSecurityException {
+    public CloseableHttpClient createHttpClient() throws GeneralSecurityException {
         SSLContext sslContext = SSLContexts.custom()
                 .loadTrustMaterial((chain, authType) -> true)
                 .build();

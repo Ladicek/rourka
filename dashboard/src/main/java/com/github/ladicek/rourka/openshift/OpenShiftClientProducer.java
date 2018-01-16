@@ -10,8 +10,6 @@ import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 
 @ApplicationScoped
 public class OpenShiftClientProducer {
@@ -20,7 +18,7 @@ public class OpenShiftClientProducer {
 
     @Produces
     @RequestScoped
-    public OpenShiftClient createOpenShiftClient() throws IOException, GeneralSecurityException {
+    public OpenShiftClient createOpenShiftClient() {
         String master = "https://" + System.getenv("KUBERNETES_SERVICE_HOST") + ":" + System.getenv("KUBERNETES_SERVICE_PORT");
 
         Config config = new ConfigBuilder()
@@ -31,7 +29,7 @@ public class OpenShiftClientProducer {
         return new DefaultOpenShiftClient(config);
     }
 
-    public void closeHttpClient(@Disposes OpenShiftClient openShiftClient) throws IOException {
+    public void closeHttpClient(@Disposes OpenShiftClient openShiftClient) {
         openShiftClient.close();
     }
 }

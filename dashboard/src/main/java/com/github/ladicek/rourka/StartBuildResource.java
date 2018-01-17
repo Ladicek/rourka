@@ -1,27 +1,41 @@
 package com.github.ladicek.rourka;
 
 import com.github.ladicek.rourka.jenkins.JenkinsClient;
-import org.apache.http.HttpResponse;
+import com.github.ladicek.rourka.jenkins.StartedBuild;
 
 import javax.inject.Inject;
-import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.net.URI;
 
-@Path("/start-build/{name}")
+@Path("/start-build/{buildName}")
 public class StartBuildResource {
+    public static String link(String buildName) {
+        return "/start-build/" + buildName;
+    }
+
     @Inject
     private JenkinsClient jenkins;
 
-    @GET // TODO must be POST
-    @Produces("text/plain;charset=utf-8")
-    public String get(@PathParam("name") String jobName) throws Exception {
-        HttpResponse response = jenkins.startBuild(jobName);
-        if (response.getStatusLine().getStatusCode() == 201) {
-            return "Build started";
+    @POST
+    public Response post(@PathParam("buildName") String buildName, @Context UriInfo uri) throws Exception {
+        StartedBuild startedBuild = jenkins.startBuild(buildName);
+
+        URI redirect;
+        if (startedBuild.success) {
+            redirect = uri.getBaseUriBuilder()
+                    .queryParam("flash", "Build {buildName} started successfully")
+                    .build(buildName);
         } else {
-            return "Failed to start build, response: " + response.toString();
+            redirect = uri.getBaseUriBuilder()
+                    .queryParam("flash", "Failed to start build {buildName}: {errorMessage}")
+                    .build(buildName, startedBuild.errorMessage);
         }
+
+        return Response.seeOther(redirect).build();
     }
 }

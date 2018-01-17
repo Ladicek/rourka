@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -30,7 +31,7 @@ public class IndexResource {
 
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public View get() throws Exception {
+    public View get(@QueryParam("flash") String flash) throws Exception {
         List<Job> jobs = jenkins.getRelevantJobs();
 
         SortedSet<TestType> header = newSortedSet(TestType::toString);
@@ -49,7 +50,8 @@ public class IndexResource {
         return new View("index.html",
                 "tables", tables,
                 "header", header,
-                "now", LocalDateTime.now()
+                "now", LocalDateTime.now(),
+                "flash", flash
         );
     }
 

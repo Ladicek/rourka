@@ -12,13 +12,16 @@ public final class TestResult {
     private final LocalDateTime timestamp;
 
     private final boolean anotherBuildRunningNow;
+    private final String runBuildLink;
 
-    public TestResult(BuildStatus status, int buildNumber, String link, LocalDateTime timestamp, boolean anotherBuildRunningNow) {
+    public TestResult(BuildStatus status, int buildNumber, String link, LocalDateTime timestamp,
+                      boolean anotherBuildRunningNow, String runBuildLink) {
         this.status = status;
         this.buildNumber = buildNumber;
         this.link = link;
         this.timestamp = timestamp;
         this.anotherBuildRunningNow = anotherBuildRunningNow;
+        this.runBuildLink = runBuildLink;
     }
 
     public BuildStatus getStatus() {
@@ -39,5 +42,9 @@ public final class TestResult {
 
     public boolean isAnotherBuildRunningNow() {
         return anotherBuildRunningNow;
+    }
+
+    public String getRunBuildLink() {
+        return runBuildLink;
     }
 }

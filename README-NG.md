@@ -45,3 +45,10 @@ Changes:
 - edit `src/main/resources/project-local.yml`
 - `mvn clean package`
 - `java -jar target/rourka-swarm.jar -S local`
+
+### `jenkins-jobs`
+
+- edit `local-config.ini`
+- `docker run -it --rm --entrypoint bash --net host -v $(pwd):/home/jenkins/jenkins-jobs ladicek/rourka-jenkins-slave-jjb`
+- `cd ~/jenkins-jobs`
+- `PYTHONHTTPSVERIFY=0 jenkins-jobs --conf local-config.ini update .`

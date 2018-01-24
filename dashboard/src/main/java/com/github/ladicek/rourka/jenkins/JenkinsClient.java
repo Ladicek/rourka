@@ -2,14 +2,10 @@ package com.github.ladicek.rourka.jenkins;
 
 import com.github.ladicek.rourka.ConsoleTextResource;
 import com.github.ladicek.rourka.StartBuildResource;
-import com.github.ladicek.rourka.ci.BuildStatus;
-import com.github.ladicek.rourka.ci.TestCluster;
-import com.github.ladicek.rourka.ci.TestDescription;
-import com.github.ladicek.rourka.ci.TestResult;
-import com.github.ladicek.rourka.ci.TestType;
+import com.github.ladicek.rourka.ci.*;
 import com.github.ladicek.rourka.openshift.TokenAuthorizingHttpClient;
 import com.google.gson.Gson;
-import io.fabric8.openshift.client.OpenShiftClient;
+import com.google.gson.JsonSyntaxException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Content;
 import org.apache.http.client.fluent.ContentResponseHandler;
@@ -57,7 +53,16 @@ public class JenkinsClient {
                 .filter(it -> it.description != null && !it.description.isEmpty())
                 .map(it -> {
                     String description = it.description.replaceAll("<!-- .*? -->", "");
-                    JsonJobDataInDescription data = gson.fromJson(description, JsonJobDataInDescription.class);
+
+                    JsonJobDataInDescription data;
+                    try {
+                        data = gson.fromJson(description, JsonJobDataInDescription.class);
+                    } catch (JsonSyntaxException exception){
+                        return new Job(null,null,null,null);
+                    }
+                    if (data == null){
+                        return new Job(null,null,null,null);
+                    }
 
                     TestResult lastResult;
                     boolean buildingNow = it.lastBuild != null && it.lastBuild.building;
@@ -74,6 +79,7 @@ public class JenkinsClient {
 
                     return new Job(new TestCluster(data.cluster), new TestDescription(data.description), new TestType(data.type), lastResult);
                 })
+                .filter(it -> it.getDescription() != null)
                 .collect(Collectors.toList());
     }
 

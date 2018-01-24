@@ -1,6 +1,6 @@
 rourka:
   jenkins:
-    url: https://jenkins-myproject.192.168.99.100.nip.io/
+    url: https://jenkins-myproject.minishift/
   openshift:
-    url: https://192.168.99.100:8443/
+    url: https://minishift:8443/
     token: replace this with the output of `oc whoami -t`

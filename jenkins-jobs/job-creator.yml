@@ -2,11 +2,11 @@
     name: rourka-jobs-github
     scm:
     - git:
-#        url: "https://github.com/Ladicek/rourka.git"
-        url: "https://github.com/mocenas/rourka.git"
+        url: "https://github.com/Ladicek/rourka.git"
         branches:
         - "master"
         skip-tag: true
+        credentials-id: rhoar-bot-github-token
 
 - job:
     name: "job-creator"

@@ -65,6 +65,8 @@ objects:
           }
 
           def emulateLauncher(action) {
+            def commandSuffix = action == 'delete' ? '|| true' : '' // don't fail everything at the very end
+
             def yamlFiles = findFiles(glob: '**/.openshiftio/*.yml') + findFiles(glob: '**/.openshiftio/*.yaml')
             for (int i = 0; i < yamlFiles.length; i++) { // because iterators aren't Serializable :-(
               def y = yamlFiles[i]
@@ -73,9 +75,9 @@ objects:
                 def content = readFile(file: y.path)
                 content = content.replaceAll('RUNTIME_VERSION', 'latest')
                 if (content.contains('kind: Template')) {
-                  sh "oc process -f ${y.path} -v SOURCE_REPOSITORY_URL=${CI_GIT_URL} -v SOURCE_REPOSITORY_REF=${CI_GIT_REF} -v SOURCE_REPOSITORY_DIR=${dir} -v MAVEN_MIRROR_URL=${MAVEN_REPO_ADD} | oc $action -f -"
+                  sh "oc process -f ${y.path} -v SOURCE_REPOSITORY_URL=${CI_GIT_URL} -v SOURCE_REPOSITORY_REF=${CI_GIT_REF} -v SOURCE_REPOSITORY_DIR=${dir} -v MAVEN_MIRROR_URL=${MAVEN_REPO_ADD} | oc $action -f - $commandSuffix"
                 } else {
-                  sh "oc $action -f ${y.path}"
+                  sh "oc $action -f ${y.path} $commandSuffix"
                 }
               }
             }

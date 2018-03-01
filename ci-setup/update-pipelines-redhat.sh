@@ -13,14 +13,18 @@ github_ref () {
       spring-boot*) echo "redhat" ;;
     esac
   elif [[ $target == "tag" ]] ; then
-    local github
-    local filter
+    local repo
+    local branch
     case $booster in
-      wfswarm*)     github=https://github.com/wildfly-swarm-openshiftio-boosters/$booster/  ; filter='redhat' ;;
-      vertx*)       github=https://github.com/openshiftio-vertx-boosters/${booster}-redhat/ ; filter='.' ;;
-      spring-boot*) github=https://github.com/snowdrop/$booster/                            ; filter='redhat' ;;
+      wfswarm*)     repo=https://github.com/wildfly-swarm-openshiftio-boosters/${booster}-redhat/ ; branch='master' ;;
+      vertx*)       repo=https://github.com/openshiftio-vertx-boosters/${booster}-redhat/         ; branch='master' ;;
+      spring-boot*) repo=https://github.com/snowdrop/$booster/                                    ; branch='redhat' ;;
     esac
-    echo $(git ls-remote --refs --tags $github | awk '{print $2}' | grep $filter | sort --version-sort --reverse | head -n 1 | sed -e 's|refs/||')
+
+    local my_clone=$(mktemp --directory)
+    git clone --quiet --branch $branch $repo $my_clone
+    git -C $my_clone describe --tags --abbrev=0
+    rm -rf $my_clone
   else
     echo $target
   fi

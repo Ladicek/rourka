@@ -71,8 +71,9 @@ objects:
               if (y.name =~ /^(application|service|resource)\./ && y.name =~ /\.ya?ml$/) {
                 def dir = findDirNameFromYamlPath(y.path)
                 def content = readFile(file: y.path)
+                content = content.replaceAll('RUNTIME_VERSION', 'latest')
                 if (content.contains('kind: Template')) {
-                  sh "oc process -f ${y.path} -v SOURCE_REPOSITORY_URL=${CI_GIT_URL} -v SOURCE_REPOSITORY_REF=${CI_GIT_REF} -v SOURCE_REPOSITORY_DIR=${dir} | oc $action -f -"
+                  sh "oc process -f ${y.path} -v SOURCE_REPOSITORY_URL=${CI_GIT_URL} -v SOURCE_REPOSITORY_REF=${CI_GIT_REF} -v SOURCE_REPOSITORY_DIR=${dir} -v MAVEN_MIRROR_URL=${MAVEN_REPO_ADD} | oc $action -f -"
                 } else {
                   sh "oc $action -f ${y.path}"
                 }

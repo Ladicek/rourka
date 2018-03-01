@@ -23,7 +23,7 @@ github_ref () {
 
     local my_clone=$(mktemp --directory)
     git clone --quiet --branch $branch $repo $my_clone
-    git -C $my_clone describe --tags --abbrev=0
+    git --git-dir $my_clone/.git describe --tags --abbrev=0
     rm -rf $my_clone
   else
     echo $target

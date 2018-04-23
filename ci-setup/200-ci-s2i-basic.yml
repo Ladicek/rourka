@@ -75,7 +75,7 @@ objects:
                 def dir = findDirNameFromYamlPath(y.path)
                 def content = readFile(file: y.path)
                 if (content.contains('kind: Template')) {
-                  sh "oc process -f ${y.path} -v SOURCE_REPOSITORY_URL=${CI_GIT_URL} -v SOURCE_REPOSITORY_REF=${CI_GIT_REF} -v SOURCE_REPOSITORY_DIR=${dir} -v MAVEN_MIRROR_URL=${MAVEN_REPO_ADD} | oc $action -f - $commandSuffix"
+                  sh "oc process -f ${y.path} -v SOURCE_REPOSITORY_URL=${CI_GIT_URL} -v SOURCE_REPOSITORY_REF=${CI_GIT_REF} -v SOURCE_REPOSITORY_DIR=${dir} | oc $action -f - $commandSuffix"
                 } else {
                   sh "oc $action -f ${y.path} $commandSuffix"
                 }
@@ -111,6 +111,7 @@ objects:
               }
 
               if ('${MAVEN_REPO_ADD}' != '') {
+                sh 'find . -regex ".*/\\.openshiftio/application.ya?ml" | xargs sed -i "s|MAVEN_MIRROR_URL|ROURKA_DISABLED_MAVEN_MIRROR_URL|"'
                 sh 'find . -regex ".*/\\.openshiftio/application.ya?ml" | xargs sed -i "s|- name: MAVEN_ARGS_APPEND|- name: MAVEN_MIRROR_URL\\n          value: ${MAVEN_REPO_ADD}\\n        - name: MAVEN_ARGS_APPEND|"'
               }
             }

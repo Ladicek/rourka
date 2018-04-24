@@ -15,16 +15,23 @@ github_ref () {
   elif [[ $target == "tag" ]] ; then
     local repo
     local branch
+    local filter
     case $booster in
-      wfswarm*)     repo=https://github.com/wildfly-swarm-openshiftio-boosters/${booster}-redhat/ ; branch='master' ;;
-      vertx*)       repo=https://github.com/openshiftio-vertx-boosters/${booster}-redhat/         ; branch='master' ;;
-      spring-boot*) repo=https://github.com/snowdrop/$booster/                                    ; branch='redhat' ;;
+      wfswarm*)     repo=https://github.com/wildfly-swarm-openshiftio-boosters/${booster}-redhat/ ; branch='master' ; filter=. ;;
+      vertx*)       repo=https://github.com/openshiftio-vertx-boosters/${booster}-redhat/         ; branch='master' ; filter=. ;;
+      spring-boot*) repo=https://github.com/snowdrop/$booster/                                    ; branch='redhat' ; filter=redhat ;;
     esac
 
+    local result
     local my_clone=$(mktemp --directory)
     git clone --quiet --branch $branch $repo $my_clone
-    git --git-dir $my_clone/.git describe --tags --abbrev=0
+    result=$(git --git-dir $my_clone/.git describe --tags --abbrev=0 2>&1)
+    if [[ "$result" =~ "fatal" ]] ; then
+      # no tag reachable from current HEAD, try selecting the latest tag
+      result=$(git --git-dir $my_clone/.git tag | grep $filter | sort --version-sort --reverse | head -n 1)
+    fi
     rm -rf $my_clone
+    echo $result
   else
     echo $target
   fi

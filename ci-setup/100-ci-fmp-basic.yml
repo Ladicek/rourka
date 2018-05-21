@@ -23,6 +23,8 @@ parameters:
   from: "[a-zA-Z0-9]{20}"
 - name: MAVEN_REPO_ADD
   description: URL of an additional Maven repo that should be added to and enabled in ~/.m2/settings.xml
+- name: S2I_IMAGE
+  description: Name of the S2I image to use; if set, the fabric8.generator.from property will be added to pom.xml
 - name: IS_REDHAT
   description: Whether to perform any actions required only for Red Hat builds
   required: true
@@ -79,6 +81,11 @@ objects:
               }
 
               stage("OpenShift test") {
+                if ('${S2I_IMAGE}' != '') {
+                  // because Fabric8 Maven plugin prefers <properties> in pom.xml over system properties on Maven cmdline
+                  sh "sed -i -e 's|<properties>|<properties><fabric8.generator.from>${S2I_IMAGE}</fabric8.generator.from>|' pom.xml"
+                }
+
                 sh "mvn clean verify -B -Popenshift,openshift-it"
               }
             } finally {

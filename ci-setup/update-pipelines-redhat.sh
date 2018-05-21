@@ -47,6 +47,10 @@ if [[ ! -z $MAVEN_REPO_ADD ]] ; then
   ADDITIONAL_OPTIONS="$ADDITIONAL_OPTIONS MAVEN_REPO_ADD=$MAVEN_REPO_ADD"
 fi
 
+if [[ ! -z $S2I_IMAGE ]] ; then
+  ADDITIONAL_OPTIONS="$ADDITIONAL_OPTIONS S2I_IMAGE=$S2I_IMAGE"
+fi
+
 if [[ -z $WFSWARM_CI_GIT_REF ]] ; then
   echo 'Skipping WildFly Swarm boosters, $WFSWARM_CI_GIT_REF missing'
 else

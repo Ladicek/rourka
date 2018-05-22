@@ -25,10 +25,6 @@ parameters:
   description: URL of an additional Maven repo that should be added to and enabled in ~/.m2/settings.xml
 - name: S2I_IMAGE
   description: Name of the S2I image to use; if set, the fabric8.generator.from property will be added to pom.xml
-- name: IS_REDHAT
-  description: Whether to perform any actions required only for Red Hat builds
-  required: true
-  value: "false"
 objects:
 - apiVersion: v1
   kind: BuildConfig
@@ -65,10 +61,6 @@ objects:
               checkout([$class: 'GitSCM',
                         branches: [[name: '${CI_GIT_REF}']],
                         userRemoteConfigs: [[url: '${CI_GIT_URL}']]])
-
-              if ('${IS_REDHAT}' == 'true') {
-                sh "mv pom-redhat.xml pom.xml || true"
-              }
             }
 
             def ssoUrl

@@ -73,10 +73,6 @@ objects:
             for (int i = 0; i < yamlFiles.length; i++) { // because iterators aren't Serializable :-(
               def y = yamlFiles[i]
               if (y.name =~ /^(application|service|resource)\./ && y.name =~ /\.ya?ml$/) {
-                sh "sed -i -e 's/RUNTIME_VERSION/latest/' ${y.path}"
-                if ('${S2I_IMAGE}' != '') {
-                  sh "sed -i -e 's|registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift.*|${S2I_IMAGE}\\n      importPolicy:\\n        insecure: true|' ${y.path}"
-                }
                 def dir = findDirNameFromYamlPath(y.path)
                 def content = readFile(file: y.path)
                 if (content.contains('kind: Template')) {
@@ -118,6 +114,12 @@ objects:
               if ('${MAVEN_REPO_ADD}' != '') {
                 sh 'find . -regex ".*/\\.openshiftio/application.ya?ml" | xargs sed -i "s|MAVEN_MIRROR_URL|ROURKA_DISABLED_MAVEN_MIRROR_URL|"'
                 sh 'find . -regex ".*/\\.openshiftio/application.ya?ml" | xargs sed -i "s|- name: MAVEN_ARGS_APPEND|- name: MAVEN_MIRROR_URL\\n          value: ${MAVEN_REPO_ADD}\\n        - name: MAVEN_ARGS_APPEND|"'
+              }
+
+              sh 'find . -regex ".*/\\.openshiftio/application.ya?ml" | xargs sed -i "s/RUNTIME_VERSION/latest/"'
+
+              if ('${S2I_IMAGE}' != '') {
+                sh 'find . -regex ".*/\\.openshiftio/application.ya?ml" | xargs sed -i "s|registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift.*|${S2I_IMAGE}\\n      importPolicy:\\n        insecure: true|"'
               }
             }
 

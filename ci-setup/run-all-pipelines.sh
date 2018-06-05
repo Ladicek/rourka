@@ -7,8 +7,8 @@ fi
 
 for B in $(oc get bc -o name | grep 'ci-\|losiot-' | grep "$FILTER" | sed -r -e 's|buildconfigs?/||') ; do
   echo "---------- $B ----------"
-  GIT_URL=$(oc get bc $B -o jsonpath='{.spec.source.git.uri}')
-  GIT_REF=$(oc get bc $B -o jsonpath='{.spec.source.git.ref}')
+  GIT_URL=$(oc get $B -o jsonpath='{.spec.source.git.uri}')
+  GIT_REF=$(oc get $B -o jsonpath='{.spec.source.git.ref}')
   GIT_SHA=$(git ls-remote $GIT_URL $GIT_REF | awk '{print $1}')
   echo "${GIT_URL}@${GIT_REF}: ${GIT_SHA}"
 

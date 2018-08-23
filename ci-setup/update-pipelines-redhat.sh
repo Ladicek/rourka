@@ -10,7 +10,7 @@ github_ref () {
     case $booster in
       wfswarm*)     echo "master" ;;
       vertx*)       echo "master" ;;
-      spring-boot*) echo "redhat" ;;
+      spring-boot*) echo "master" ;;
     esac
   elif [[ $target == "tag" ]] ; then
     local repo
@@ -19,15 +19,15 @@ github_ref () {
     case $booster in
       wfswarm*)     repo=https://github.com/wildfly-swarm-openshiftio-boosters/${booster}-redhat/ ; branch='master' ; filter=. ;;
       vertx*)       repo=https://github.com/openshiftio-vertx-boosters/${booster}-redhat/         ; branch='master' ; filter=. ;;
-      spring-boot*) repo=https://github.com/snowdrop/$booster/                                    ; branch='redhat' ; filter=redhat ;;
+      spring-boot*) repo=https://github.com/snowdrop/$booster/                                    ; branch='master' ; filter='^[^v].*redhat' ;;
     esac
 
     local result
     local my_clone=$(mktemp --directory)
     git clone --quiet --branch $branch $repo $my_clone
     result=$(git --git-dir $my_clone/.git describe --tags --abbrev=0 2>&1)
-    if [[ "$result" =~ "fatal" ]] ; then
-      # no tag reachable from current HEAD, try selecting the latest tag
+    if [[ "$result" =~ "fatal" ]] || [[ ! "$result" =~ "redhat" ]] ; then
+      # no -redhat tag reachable from current HEAD, try selecting the latest tag
       result=$(git --git-dir $my_clone/.git tag | grep $filter | sort --version-sort --reverse | head -n 1)
     fi
     rm -rf $my_clone

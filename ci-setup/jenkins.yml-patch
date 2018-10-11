@@ -6,3 +6,6 @@ spec:
         env:
         - name: OPENSHIFT_JENKINS_JVM_ARCH
           value: x86_64
+        resources:
+          limits:
+            memory: 1Gi
